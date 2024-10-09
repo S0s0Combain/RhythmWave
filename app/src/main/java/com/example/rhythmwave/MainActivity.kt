@@ -11,6 +11,8 @@ import android.os.Bundle
 import android.os.IBinder
 import android.provider.MediaStore
 import android.util.Log
+import android.view.View
+import android.widget.FrameLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -22,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 class MainActivity : AppCompatActivity() {
     private lateinit var tracksList: RecyclerView
+    private lateinit var fragmentContainer: FrameLayout
     private var musicService: MusicService? = null
     private var isBound = false
 
@@ -51,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         tracksList = findViewById(R.id.tracksRecyclerView)
-
+        fragmentContainer = findViewById(R.id.fragmentContainer)
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.READ_MEDIA_AUDIO
@@ -65,7 +68,11 @@ class MainActivity : AppCompatActivity() {
             Log.d("MyLog", "разрешения не предоставлены")
         } else {
             Log.d("MyLog", "разрешения предоставлены")
-            bindService(Intent(this, MusicService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
+            bindService(
+                Intent(this, MusicService::class.java),
+                serviceConnection,
+                Context.BIND_AUTO_CREATE
+            )
         }
     }
 
@@ -76,7 +83,11 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 1 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            bindService(Intent(this, MusicService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
+            bindService(
+                Intent(this, MusicService::class.java),
+                serviceConnection,
+                Context.BIND_AUTO_CREATE
+            )
         }
     }
 
@@ -119,13 +130,14 @@ class MainActivity : AppCompatActivity() {
                     val duration =
                         cursor.getInt(it.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION))
                     val id = cursor.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
-                    val mimeType = cursor.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE))
+                    val mimeType =
+                        cursor.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE))
 
-                    if(duration<30000){
+                    if (duration < 30000) {
                         continue
                     }
 
-                    if(mimeType !="audio/mpeg"){
+                    if (mimeType != "audio/mpeg") {
                         continue
                     }
 
@@ -143,6 +155,10 @@ class MainActivity : AppCompatActivity() {
             if (musicService?.getCurrentTrack() == track) {
                 musicService?.togglePlayPause()
             } else {
+                fragmentContainer.visibility = View.VISIBLE
+                supportFragmentManager.beginTransaction()
+                    .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
+                    .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null).commit()
                 musicService?.playTrack(track)
             }
         }
