@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".PlayerFragment"
-    android:background="@drawable/item_gradient">
+    android:background="@color/dark_background">
 
     <com.example.rhythmwave.VisualizationView
         android:id="@+id/visualizationView"

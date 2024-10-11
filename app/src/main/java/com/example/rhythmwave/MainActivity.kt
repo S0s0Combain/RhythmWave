@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.database.Cursor
+import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import android.provider.MediaStore
@@ -21,6 +22,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.io.ByteArrayOutputStream
+import java.net.URI
 
 class MainActivity : AppCompatActivity() {
     private lateinit var tracksList: RecyclerView
@@ -54,6 +57,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         tracksList = findViewById(R.id.tracksRecyclerView)
+        val spaceInPixels = resources.getDimensionPixelSize(R.dimen.space_between_items)
+        tracksList.addItemDecoration(SpacesItemDecoration(spaceInPixels))
         fragmentContainer = findViewById(R.id.fragmentContainer)
         if (ContextCompat.checkSelfPermission(
                 this,
@@ -141,7 +146,8 @@ class MainActivity : AppCompatActivity() {
                         continue
                     }
 
-                    tracks.add(Track(title, artist, duration, id))
+                    val albumArt = getAlbumArt(this, id)
+                    tracks.add(Track(title, artist, duration, id, albumArt))
                 } while (it.moveToNext())
             } else {
                 Log.d("MyLog", "Треки не найдены")
@@ -162,5 +168,32 @@ class MainActivity : AppCompatActivity() {
                 musicService?.playTrack(track)
             }
         }
+    }
+
+    private fun getAlbumArt(context: Context, trackId: Long):ByteArray?{
+        val uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        val selection = "${MediaStore.Audio.Media._ID} = ?"
+        val selectionArgs = arrayOf(trackId.toString())
+        val projection = arrayOf(MediaStore.Audio.Media.ALBUM_ID)
+
+        var albumId: Long? = null
+        context.contentResolver.query(uri, projection, selection, selectionArgs, null)?.use { cursor ->
+            if(cursor.moveToFirst()){
+                albumId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
+            }
+        }
+
+        if(albumId!=null){
+            val albumArtUri: Uri = Uri.parse("content://media/external/audio/albumart/$albumId")
+            return try{
+                val inputStream = context.contentResolver.openInputStream(albumArtUri)
+                val byteArrayOutputStream = ByteArrayOutputStream()
+                inputStream?.copyTo(byteArrayOutputStream)
+                byteArrayOutputStream.toByteArray()
+            } catch(e: Exception) {
+                null
+            }
+        }
+        return null
     }
 }
