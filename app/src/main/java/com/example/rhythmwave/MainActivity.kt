@@ -269,4 +269,12 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
     override fun onTrackChanged(track: Track) {
         showTrackControl(track)
     }
+
+    override fun onPlaybackStateChanged(isPlaying: Boolean) {
+        if (isPlaying) {
+            pauseButton.setImageResource(R.drawable.baseline_pause_24)
+        } else {
+            pauseButton.setImageResource(R.drawable.baseline_play_arrow_24)
+        }
+    }
 }

@@ -57,18 +57,22 @@ class MusicService : Service() {
         exoPlayer.prepare()
         exoPlayer.playWhenReady = true
         trackControlCallback?.onTrackChanged(track)
+        notifyPlaybackStateChanged(true)
     }
 
     fun pauseTrack() {
         exoPlayer.playWhenReady = false
+        notifyPlaybackStateChanged(false)
     }
 
     fun resumeTrack() {
         exoPlayer.playWhenReady = true
+        notifyPlaybackStateChanged(true)
     }
 
     fun togglePlayPause() {
         exoPlayer.playWhenReady = !exoPlayer.playWhenReady
+        notifyPlaybackStateChanged(exoPlayer.playWhenReady)
     }
 
     fun previousTrack() {
@@ -108,6 +112,10 @@ class MusicService : Service() {
 
     fun setTrackControlCallback(callback: TrackControlCallback){
         trackControlCallback = callback
+    }
+
+    fun notifyPlaybackStateChanged(isPlaying: Boolean) {
+        trackControlCallback?.onPlaybackStateChanged(isPlaying)
     }
 
     inner class MusicServiceBinder : Binder() {
