@@ -19,6 +19,7 @@ class MusicService : Service() {
     private var currentTrack: Track? = null
     private var trackList: List<Track> = emptyList()
     private var currentTrackIndex: Int = 0
+    private var trackControlCallback: TrackControlCallback? = null
 
     private val binder = MusicServiceBinder()
 
@@ -55,6 +56,7 @@ class MusicService : Service() {
         exoPlayer.setMediaSource(mediaSource)
         exoPlayer.prepare()
         exoPlayer.playWhenReady = true
+        trackControlCallback?.onTrackChanged(track)
     }
 
     fun pauseTrack() {
@@ -102,6 +104,10 @@ class MusicService : Service() {
 
     fun isPlaying(): Boolean {
         return exoPlayer.playWhenReady
+    }
+
+    fun setTrackControlCallback(callback: TrackControlCallback){
+        trackControlCallback = callback
     }
 
     inner class MusicServiceBinder : Binder() {

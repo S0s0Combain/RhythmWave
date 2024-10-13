@@ -31,7 +31,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.ByteArrayOutputStream
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), TrackControlCallback {
     private lateinit var tracksList: RecyclerView
     private lateinit var fragmentContainer: FrameLayout
     private lateinit var trackControlLayout: ConstraintLayout
@@ -50,6 +50,7 @@ class MainActivity : AppCompatActivity() {
             val binder = service as MusicService.MusicServiceBinder
             musicService = binder.getService()
             isBound = true
+            musicService?.setTrackControlCallback(this@MainActivity)
             loadTracks()
         }
 
@@ -189,10 +190,18 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     musicService?.resumeTrack()
                     showTrackControl(track)
+                    fragmentContainer.visibility = View.VISIBLE
+                    supportFragmentManager.beginTransaction()
+                        .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
+                        .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null).commit()
                 }
             } else {
                 musicService?.playTrack(track)
                 showTrackControl(track)
+                fragmentContainer.visibility = View.VISIBLE
+                supportFragmentManager.beginTransaction()
+                    .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
+                    .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null).commit()
             }
         }
     }
@@ -255,9 +264,9 @@ class MainActivity : AppCompatActivity() {
         }
         trackTitleTextView.text = track.title
         artistTextView.text = track.author
-        fragmentContainer.visibility = View.VISIBLE
-        supportFragmentManager.beginTransaction()
-            .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
-            .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null).commit()
+    }
+
+    override fun onTrackChanged(track: Track) {
+        showTrackControl(track)
     }
 }

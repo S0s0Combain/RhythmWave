@@ -42,8 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:text="Track title"
-            android:textColor="@color/accent_color"
+            android:textColor="@color/light_gray"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintStart_toEndOf="@+id/trackImage"
@@ -54,8 +53,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:text="Artist"
-            android:textColor="@color/accent_color"
+            android:textColor="@color/gray"
             android:textSize="14sp"
             android:textStyle="bold"
             app:layout_constraintStart_toEndOf="@+id/trackImage"
@@ -70,7 +68,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/pauseButton"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/accent_color" />
+            app:tint="@color/light_gray" />
 
         <ImageButton
             android:id="@+id/pauseButton"
@@ -81,7 +79,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/nextButton"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/accent_color" />
+            app:tint="@color/light_gray" />
 
         <ImageButton
             android:id="@+id/nextButton"
@@ -92,7 +90,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/accent_color" />
+            app:tint="@color/light_gray" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <FrameLayout

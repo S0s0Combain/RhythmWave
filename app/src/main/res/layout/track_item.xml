@@ -22,13 +22,13 @@
             android:id="@+id/titleTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#E0E0E0" />
+            android:textColor="@color/light_gray" />
 
         <TextView
             android:id="@+id/artistTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#A9A9A9" />
+            android:textColor="@color/gray" />
     </LinearLayout>
 
     <LinearLayout
