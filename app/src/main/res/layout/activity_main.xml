@@ -63,8 +63,8 @@
 
         <ImageButton
             android:id="@+id/prevButton"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:background="@null"
             android:src="@drawable/baseline_skip_previous_24"
             app:layout_constraintBottom_toBottomOf="parent"

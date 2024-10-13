@@ -44,6 +44,7 @@ class MusicService : Service() {
 
     fun playTrack(track: Track) {
         currentTrack = track
+        currentTrackIndex = trackList.indexOf(track)
         val mediaItem = MediaItem.fromUri(getTrackUri(track.id))
         val mediaSource: MediaSource = ProgressiveMediaSource.Factory(
             DefaultDataSourceFactory(
@@ -96,6 +97,11 @@ class MusicService : Service() {
 
     fun setTrackList(tracks: List<Track>) {
         trackList = tracks
+        currentTrackIndex = 0
+    }
+
+    fun isPlaying(): Boolean {
+        return exoPlayer.playWhenReady
     }
 
     inner class MusicServiceBinder : Binder() {

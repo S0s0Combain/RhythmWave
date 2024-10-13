@@ -7,15 +7,22 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.database.Cursor
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -23,11 +30,17 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.ByteArrayOutputStream
-import java.net.URI
 
 class MainActivity : AppCompatActivity() {
     private lateinit var tracksList: RecyclerView
     private lateinit var fragmentContainer: FrameLayout
+    private lateinit var trackControlLayout: ConstraintLayout
+    private lateinit var trackImage: ImageView
+    private lateinit var trackTitleTextView: TextView
+    private lateinit var artistTextView: TextView
+    private lateinit var prevButton: ImageButton
+    private lateinit var pauseButton: ImageButton
+    private lateinit var nextButton: ImageButton
     private var musicService: MusicService? = null
     private var isBound = false
 
@@ -59,7 +72,19 @@ class MainActivity : AppCompatActivity() {
         tracksList = findViewById(R.id.tracksRecyclerView)
         val spaceInPixels = resources.getDimensionPixelSize(R.dimen.space_between_items)
         tracksList.addItemDecoration(SpacesItemDecoration(spaceInPixels))
+        trackControlLayout = findViewById(R.id.trackControlLayout)
+        trackImage = findViewById(R.id.trackImage)
+        trackTitleTextView = findViewById(R.id.trackTitleTextView)
+        artistTextView = findViewById(R.id.artistTextView)
+        prevButton = findViewById(R.id.prevButton)
+        pauseButton = findViewById(R.id.pauseButton)
+        nextButton = findViewById(R.id.nextButton)
         fragmentContainer = findViewById(R.id.fragmentContainer)
+
+        prevButton.setOnClickListener { musicService?.previousTrack() }
+        pauseButton.setOnClickListener { musicService?.togglePlayPause() }
+        nextButton.setOnClickListener { musicService?.nextTrack() }
+
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.READ_MEDIA_AUDIO
@@ -159,41 +184,80 @@ class MainActivity : AppCompatActivity() {
         tracksList.layoutManager = LinearLayoutManager(this)
         tracksList.adapter = TrackAdapter(tracks) { track ->
             if (musicService?.getCurrentTrack() == track) {
-                musicService?.togglePlayPause()
+                if (musicService?.isPlaying() == true) {
+                    musicService?.pauseTrack()
+                } else {
+                    musicService?.resumeTrack()
+                    showTrackControl(track)
+                }
             } else {
-                fragmentContainer.visibility = View.VISIBLE
-                supportFragmentManager.beginTransaction()
-                    .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
-                    .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null).commit()
                 musicService?.playTrack(track)
+                showTrackControl(track)
             }
         }
     }
 
-    private fun getAlbumArt(context: Context, trackId: Long):ByteArray?{
+    private fun getAlbumArt(context: Context, trackId: Long): ByteArray? {
         val uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val selection = "${MediaStore.Audio.Media._ID} = ?"
         val selectionArgs = arrayOf(trackId.toString())
         val projection = arrayOf(MediaStore.Audio.Media.ALBUM_ID)
 
         var albumId: Long? = null
-        context.contentResolver.query(uri, projection, selection, selectionArgs, null)?.use { cursor ->
-            if(cursor.moveToFirst()){
-                albumId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
+        context.contentResolver.query(uri, projection, selection, selectionArgs, null)
+            ?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    albumId =
+                        cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
+                }
             }
-        }
 
-        if(albumId!=null){
+        if (albumId != null) {
             val albumArtUri: Uri = Uri.parse("content://media/external/audio/albumart/$albumId")
-            return try{
+            return try {
                 val inputStream = context.contentResolver.openInputStream(albumArtUri)
                 val byteArrayOutputStream = ByteArrayOutputStream()
                 inputStream?.copyTo(byteArrayOutputStream)
                 byteArrayOutputStream.toByteArray()
-            } catch(e: Exception) {
+            } catch (e: Exception) {
                 null
             }
         }
         return null
+    }
+
+    override fun onBackPressed() {
+        if (fragmentContainer.visibility == View.VISIBLE) {
+            val animation = AnimationUtils.loadAnimation(this, R.anim.fade_out)
+            animation.setAnimationListener(object : Animation.AnimationListener {
+                override fun onAnimationStart(animation: Animation?) {}
+
+                override fun onAnimationEnd(animation: Animation?) {
+                    fragmentContainer.visibility = View.GONE
+                    supportFragmentManager.popBackStack()
+                }
+
+                override fun onAnimationRepeat(animation: Animation?) {}
+            })
+            fragmentContainer.startAnimation(animation)
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    private fun showTrackControl(track: Track) {
+        trackControlLayout.visibility = View.VISIBLE
+        if (track.albumArt != null) {
+            val bitmap =
+                BitmapFactory.decodeByteArray(track.albumArt, 0, track.albumArt.size)
+            val roundedBitmap = ImageUtils.roundCorner(bitmap, 40f)
+            trackImage.setImageBitmap(roundedBitmap)
+        }
+        trackTitleTextView.text = track.title
+        artistTextView.text = track.author
+        fragmentContainer.visibility = View.VISIBLE
+        supportFragmentManager.beginTransaction()
+            .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
+            .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null).commit()
     }
 }
