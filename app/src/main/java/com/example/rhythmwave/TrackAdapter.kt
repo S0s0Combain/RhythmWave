@@ -1,14 +1,6 @@
 package com.example.rhythmwave
 
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
-import android.graphics.Rect
-import android.graphics.RectF
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,7 +31,7 @@ class TrackAdapter(
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
         val track = tracks[position]
         holder.titleTextView.text = track.title
-        holder.artistTextView.text = track.author
+        holder.artistTextView.text = track.artist
         if(track.albumArt != null){
             val bitmap = BitmapFactory.decodeByteArray(track.albumArt, 0, track.albumArt.size)
             val roundedBitmap = ImageUtils.roundCorner(bitmap, 40f)

@@ -85,8 +85,10 @@ class MusicService : Service() {
     fun nextTrack() {
         if (currentTrackIndex < trackList.size - 1) {
             currentTrackIndex++
-            playTrack(trackList[currentTrackIndex])
+        } else {
+            currentTrackIndex = 0
         }
+        playTrack(trackList[currentTrackIndex])
     }
 
     fun seekTo(position: Int) {
@@ -110,7 +112,7 @@ class MusicService : Service() {
         return exoPlayer.playWhenReady
     }
 
-    fun setTrackControlCallback(callback: TrackControlCallback){
+    fun setTrackControlCallback(callback: TrackControlCallback) {
         trackControlCallback = callback
     }
 

@@ -11,10 +11,11 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tracksRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/trackControlLayout"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/trackControlLayout"
@@ -39,26 +40,41 @@
 
         <TextView
             android:id="@+id/trackTitleTextView"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:maxLines="1"
             android:textColor="@color/light_gray"
             android:textSize="18sp"
             android:textStyle="bold"
+            android:ellipsize="end"
             app:layout_constraintStart_toEndOf="@+id/trackImage"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toStartOf="@+id/prevButton"
+            app:layout_constraintTop_toTopOf="@+id/textGroup"
+            app:layout_constraintBottom_toTopOf="@+id/artistTextView" />
 
         <TextView
             android:id="@+id/artistTextView"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:textColor="@color/gray"
             android:textSize="14sp"
             android:textStyle="bold"
+            android:ellipsize="end"
             app:layout_constraintStart_toEndOf="@+id/trackImage"
-            app:layout_constraintTop_toBottomOf="@+id/trackTitleTextView" />
+            app:layout_constraintEnd_toStartOf="@+id/prevButton"
+            app:layout_constraintTop_toBottomOf="@+id/trackTitleTextView"
+            app:layout_constraintBottom_toBottomOf="@+id/textGroup" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/textGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.5" />
 
         <ImageButton
             android:id="@+id/prevButton"
@@ -71,7 +87,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/pauseButton"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/light_gray" />
+            app:tint="@color/gray" />
 
         <ImageButton
             android:id="@+id/pauseButton"
@@ -84,7 +100,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/nextButton"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/light_gray" />
+            app:tint="@color/gray" />
 
         <ImageButton
             android:id="@+id/nextButton"
@@ -96,7 +112,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/light_gray" />
+            app:tint="@color/gray" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <FrameLayout

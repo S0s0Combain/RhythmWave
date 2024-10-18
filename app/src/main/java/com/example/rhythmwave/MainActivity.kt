@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
     private lateinit var prevButton: ImageButton
     private lateinit var pauseButton: ImageButton
     private lateinit var nextButton: ImageButton
-    private var musicService: MusicService? = null
+    var musicService: MusicService? = null
     private var isBound = false
 
     private val serviceConnection = object : ServiceConnection {
@@ -193,15 +193,17 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
                     fragmentContainer.visibility = View.VISIBLE
                     supportFragmentManager.beginTransaction()
                         .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
-                        .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null).commit()
+                        .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null)
+                        .commit()
                 }
             } else {
                 musicService?.playTrack(track)
-                showTrackControl(track)
+
                 fragmentContainer.visibility = View.VISIBLE
                 supportFragmentManager.beginTransaction()
                     .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
                     .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null).commit()
+                showTrackControl(track)
             }
         }
     }
@@ -263,7 +265,11 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
             trackImage.setImageBitmap(roundedBitmap)
         }
         trackTitleTextView.text = track.title
-        artistTextView.text = track.author
+        artistTextView.text = track.artist
+
+        val playerFragment =
+            supportFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+        playerFragment?.updateTrackInfo(track)
     }
 
     override fun onTrackChanged(track: Track) {
@@ -276,5 +282,12 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
         } else {
             pauseButton.setImageResource(R.drawable.baseline_play_arrow_24)
         }
+
+        val playerFragment =
+            supportFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+        playerFragment?.updateSeekbar(
+            musicService?.getCurrentPosition() ?: 0,
+            musicService?.getCurrentTrack()?.duration ?: 0
+        )
     }
 }

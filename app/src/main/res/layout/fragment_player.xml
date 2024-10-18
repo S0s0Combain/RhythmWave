@@ -39,7 +39,7 @@
         app:layout_constraintTop_toBottomOf="@+id/visualizationView" />
 
     <TextView
-        android:id="@+id/authorTextView"
+        android:id="@+id/artistTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/titleTextView"
@@ -56,7 +56,7 @@
         android:layout_marginTop="16dp"
         android:gravity="center"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/authorTextView">
+        app:layout_constraintTop_toBottomOf="@id/artistTextView">
 
         <ImageButton
             android:id="@+id/prevButton"
@@ -78,6 +78,7 @@
     </LinearLayout>
 
     <SeekBar
+        android:id="@+id/fragmentSeekBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
