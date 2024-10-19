@@ -2,9 +2,11 @@ package com.example.rhythmwave
 
 import android.annotation.SuppressLint
 import android.gesture.Gesture
+import android.media.audiofx.Visualizer
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.GestureDetector
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -28,6 +30,8 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     private lateinit var nextButton: ImageButton
     private lateinit var fragmentSeekBar: SeekBar
     private lateinit var gestureDetector: GestureDetector
+    private lateinit var visualizationView: VisualizationView
+    private var visualizer: Visualizer? = null
     private var musicService: MusicService? = null
     private val handler = Handler(Looper.getMainLooper())
     private val updateSeekBarRunnable = object : Runnable {
@@ -52,6 +56,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         pauseButton = view.findViewById(R.id.pauseButton)
         nextButton = view.findViewById(R.id.nextButton)
         fragmentSeekBar = view.findViewById(R.id.fragmentSeekBar)
+        visualizationView = view.findViewById(R.id.visualizationView)
 
         buttonDown.setOnClickListener { collapseFragment() }
         prevButton.setOnClickListener { musicService?.previousTrack() }
@@ -76,6 +81,27 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         }
 
         musicService = (activity as MainActivity).musicService
+        visualizer = Visualizer(musicService?.getAudioSessionId()!!).apply {
+            captureSize = Visualizer.getCaptureSizeRange()[1]
+            setDataCaptureListener(object : Visualizer.OnDataCaptureListener {
+                override fun onWaveFormDataCapture(
+                    visualizer: Visualizer?,
+                    waveform: ByteArray?,
+                    samplingRate: Int
+                ) {
+                    // Not used
+                }
+
+                override fun onFftDataCapture(
+                    visualizer: Visualizer?,
+                    fft: ByteArray?,
+                    samplingRate: Int
+                ) {
+                    fft?.let { visualizationView.updateVisualizer(it) }
+                }
+            }, Visualizer.getMaxCaptureRate() / 2, true, true)
+            enabled = true
+        }
         return view
     }
 
@@ -159,5 +185,10 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     fun updateSeekbar(position: Int, duration: Int) {
         fragmentSeekBar.max = duration
         fragmentSeekBar.progress = position
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        visualizer?.release()
     }
 }

@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Binder
 import android.os.IBinder
 import android.provider.MediaStore
+import android.util.Log
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.SimpleExoPlayer
@@ -118,6 +119,12 @@ class MusicService : Service() {
 
     fun notifyPlaybackStateChanged(isPlaying: Boolean) {
         trackControlCallback?.onPlaybackStateChanged(isPlaying)
+    }
+
+
+    fun getAudioSessionId():Int{
+        Log.d("MyLog", exoPlayer.audioSessionId.toString())
+        return exoPlayer.audioSessionId
     }
 
     inner class MusicServiceBinder : Binder() {
