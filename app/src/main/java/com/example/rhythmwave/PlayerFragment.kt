@@ -60,7 +60,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
 
         buttonDown.setOnClickListener { collapseFragment() }
         prevButton.setOnClickListener { musicService?.previousTrack() }
-        pauseButton.setOnClickListener { musicService?.pauseTrack() }
+        pauseButton.setOnClickListener { musicService?.togglePlayPause() }
         nextButton.setOnClickListener { musicService?.nextTrack() }
         fragmentSeekBar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
