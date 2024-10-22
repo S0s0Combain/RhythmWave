@@ -12,8 +12,8 @@ import kotlin.math.log10
 
 class VisualizationView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val paint = Paint().apply {
-        color = android.graphics.Color.GREEN
-        strokeWidth = 5f
+        color = Color.GREEN
+        strokeWidth = 30f
     }
     private var fftData = ByteArray(0)
 

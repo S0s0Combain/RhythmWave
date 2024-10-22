@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewAnimationUtils
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -82,7 +83,10 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
 
         musicService = (activity as MainActivity).musicService
         visualizer = Visualizer(musicService?.getAudioSessionId()!!).apply {
-            captureSize = Visualizer.getCaptureSizeRange()[1]
+            //captureSize = Visualizer.getCaptureSizeRange()[1]
+            captureSize = 512
+            scalingMode = Visualizer.SCALING_MODE_NORMALIZED
+            measurementMode = Visualizer.MEASUREMENT_MODE_NONE
             setDataCaptureListener(object : Visualizer.OnDataCaptureListener {
                 override fun onWaveFormDataCapture(
                     visualizer: Visualizer?,

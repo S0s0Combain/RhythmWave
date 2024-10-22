@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/dark_background"
+    android:padding="16dp"
     tools:context=".PlayerFragment">
 
     <LinearLayout
@@ -14,12 +15,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
         <ImageButton
             android:id="@+id/buttonDown"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/baseline_keyboard_arrow_down_24"/>
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/baseline_keyboard_arrow_down_24"
+            app:tint="@color/gray" />
     </LinearLayout>
+
     <com.example.rhythmwave.VisualizationView
         android:id="@+id/visualizationView"
         android:layout_width="match_parent"
@@ -32,7 +38,7 @@
         android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/white"
+        android:textColor="@color/light_gray"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -43,11 +49,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/titleTextView"
-        android:textColor="@color/white"
+        android:textColor="@color/light_gray"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/titleTextView" />
+
+    <SeekBar
+        android:id="@+id/fragmentSeekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/artistTextView" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -56,30 +68,35 @@
         android:layout_marginTop="16dp"
         android:gravity="center"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/artistTextView">
+        app:layout_constraintTop_toBottomOf="@id/fragmentSeekBar">
 
         <ImageButton
             android:id="@+id/prevButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/baseline_skip_previous_24" />
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/baseline_skip_previous_24"
+            app:tint="@color/gray" />
 
         <ImageButton
             android:id="@+id/pauseButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/baseline_pause_circle_24" />
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="50dp"
+            android:layout_marginEnd="50dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/baseline_pause_circle_24"
+            app:tint="@color/gray" />
 
         <ImageButton
             android:id="@+id/nextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/baseline_skip_next_24" />
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/baseline_skip_next_24"
+            app:tint="@color/gray" />
     </LinearLayout>
-
-    <SeekBar
-        android:id="@+id/fragmentSeekBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 </androidx.constraintlayout.widget.ConstraintLayout>

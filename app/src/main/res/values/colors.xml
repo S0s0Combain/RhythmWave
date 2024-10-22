@@ -4,6 +4,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="dark_background">#121212</color>
     <color name="accent_color">#FF69B4</color>
+    <color name="neon_purple">#FF00FF</color>
     <color name="light_gray">#E0E0E0</color>
     <color name="gray">#A9A9A9</color>
 </resources>

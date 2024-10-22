@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
     private lateinit var nextButton: ImageButton
     var musicService: MusicService? = null
     private var isBound = false
+    private lateinit var trackAdapter: TrackAdapter
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -182,8 +183,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
 
         musicService?.setTrackList(tracks)
 
-        tracksList.layoutManager = LinearLayoutManager(this)
-        tracksList.adapter = TrackAdapter(tracks) { track ->
+        trackAdapter = TrackAdapter { track ->
             if (musicService?.getCurrentTrack() == track) {
                 if (musicService?.isPlaying() == true) {
                     musicService?.pauseTrack()
@@ -206,6 +206,9 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
                 showTrackControl(track)
             }
         }
+        tracksList.layoutManager = LinearLayoutManager(this)
+        tracksList.adapter = trackAdapter
+        trackAdapter.updateTracks(tracks)
     }
 
     private fun getAlbumArt(context: Context, trackId: Long): ByteArray? {
@@ -266,6 +269,8 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
         }
         trackTitleTextView.text = track.title
         artistTextView.text = track.artist
+
+        trackAdapter.updateCurrentTrack(track)
 
         val playerFragment =
             supportFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
