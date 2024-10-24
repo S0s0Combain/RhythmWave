@@ -11,7 +11,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 
 class TrackAdapter(
-    private val onTrackClick: (Track) -> Unit
+    private val onTrackClick: (Track) -> Unit,
+    private val onShareClick: (Track) -> Unit
 ) : RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
 
     private var tracks: List<Track> = emptyList()
@@ -22,6 +23,7 @@ class TrackAdapter(
         val artistTextView = itemView.findViewById<TextView>(R.id.artistTextView)
         val trackImageView = itemView.findViewById<ImageView>(R.id.trackImage)
         val equalizerView = itemView.findViewById<EqualizerView>(R.id.equalizerView)
+        val replyImageView = itemView.findViewById<ImageView>(R.id.replyImageView)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
@@ -46,12 +48,23 @@ class TrackAdapter(
         }
 
         holder.itemView.setOnClickListener { onTrackClick(track) }
+        holder.replyImageView.setOnClickListener { onShareClick(track) }
 
         if (track == currentTrack) {
-            holder.titleTextView.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.neon_purple))
+            holder.titleTextView.setTextColor(
+                ContextCompat.getColor(
+                    holder.itemView.context,
+                    R.color.neon_purple
+                )
+            )
             holder.equalizerView.visibility = View.VISIBLE
         } else {
-            holder.titleTextView.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.light_gray))
+            holder.titleTextView.setTextColor(
+                ContextCompat.getColor(
+                    holder.itemView.context,
+                    R.color.light_gray
+                )
+            )
             holder.equalizerView.visibility = View.GONE
         }
     }

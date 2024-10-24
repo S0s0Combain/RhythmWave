@@ -2,6 +2,7 @@ package com.example.rhythmwave
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
@@ -14,9 +15,9 @@ class EqualizerView(context: Context, attrs: AttributeSet? = null) : View(contex
         strokeWidth = 10f
     }
 
-    private val bars = MutableList(10) { Random.nextInt(10, 100) }
+    private val bars = MutableList(3) { Random.nextInt(10, 100) }
     private val barWidth = 20f
-    private val barSpacing = 10f
+    private val barSpacing = 5f
 
     init {
         startAnimation()

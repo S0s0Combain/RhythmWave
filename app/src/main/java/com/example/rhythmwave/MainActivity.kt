@@ -183,7 +183,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
 
         musicService?.setTrackList(tracks)
 
-        trackAdapter = TrackAdapter { track ->
+        trackAdapter = TrackAdapter( onTrackClick = { track ->
             if (musicService?.getCurrentTrack() == track) {
                 if (musicService?.isPlaying() == true) {
                     musicService?.pauseTrack()
@@ -205,7 +205,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
                     .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null).commit()
                 showTrackControl(track)
             }
-        }
+        }, onShareClick = {track -> TrackUtils.shareTrack(this, track, contentResolver)})
         tracksList.layoutManager = LinearLayoutManager(this)
         tracksList.adapter = trackAdapter
         trackAdapter.updateTracks(tracks)
