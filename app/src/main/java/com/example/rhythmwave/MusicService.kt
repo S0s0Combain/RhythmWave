@@ -10,6 +10,7 @@ import android.util.Log
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.Tracks
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
@@ -126,6 +127,8 @@ class MusicService : Service() {
         Log.d("MyLog", exoPlayer.audioSessionId.toString())
         return exoPlayer.audioSessionId
     }
+
+    fun getTrackList(): List<Track> = trackList
 
     inner class MusicServiceBinder : Binder() {
         fun getService(): MusicService = this@MusicService

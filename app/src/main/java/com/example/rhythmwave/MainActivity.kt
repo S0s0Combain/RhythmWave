@@ -16,6 +16,7 @@ import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -41,6 +42,8 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
     private lateinit var prevButton: ImageButton
     private lateinit var pauseButton: ImageButton
     private lateinit var nextButton: ImageButton
+    private lateinit var searchEditText: EditText
+    private lateinit var equalizerImageButton: ImageButton
     var musicService: MusicService? = null
     private var isBound = false
     private lateinit var trackAdapter: TrackAdapter
@@ -71,7 +74,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
             insets
         }
 
-        tracksList = findViewById(R.id.tracksRecyclerView)
+        tracksList = findViewById(R.id.searchRecyclerView)
         val spaceInPixels = resources.getDimensionPixelSize(R.dimen.space_between_items)
         tracksList.addItemDecoration(SpacesItemDecoration(spaceInPixels))
         trackControlLayout = findViewById(R.id.trackControlLayout)
@@ -82,10 +85,20 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
         pauseButton = findViewById(R.id.pauseButton)
         nextButton = findViewById(R.id.nextButton)
         fragmentContainer = findViewById(R.id.fragmentContainer)
+        searchEditText = findViewById(R.id.searchEditText)
+        equalizerImageButton = findViewById(R.id.equalizerImageButton)
 
         prevButton.setOnClickListener { musicService?.previousTrack() }
         pauseButton.setOnClickListener { musicService?.togglePlayPause() }
         nextButton.setOnClickListener { musicService?.nextTrack() }
+        searchEditText.setOnClickListener {
+            val searchFragment = SearchFragment()
+            searchFragment.setTrackList(musicService?.getTrackList() ?: listOf())
+            supportFragmentManager.beginTransaction()
+                .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
+                .replace(R.id.fragmentContainer, searchFragment).addToBackStack(null).commit()
+            fragmentContainer.visibility = View.VISIBLE
+        }
 
         if (ContextCompat.checkSelfPermission(
                 this,
@@ -183,7 +196,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
 
         musicService?.setTrackList(tracks)
 
-        trackAdapter = TrackAdapter( onTrackClick = { track ->
+        trackAdapter = TrackAdapter(onTrackClick = { track ->
             if (musicService?.getCurrentTrack() == track) {
                 if (musicService?.isPlaying() == true) {
                     musicService?.pauseTrack()
@@ -198,14 +211,13 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
                 }
             } else {
                 musicService?.playTrack(track)
-
                 fragmentContainer.visibility = View.VISIBLE
                 supportFragmentManager.beginTransaction()
                     .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
                     .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null).commit()
                 showTrackControl(track)
             }
-        }, onShareClick = {track -> TrackUtils.shareTrack(this, track, contentResolver)})
+        }, onShareClick = { track -> TrackUtils.shareTrack(this, track, contentResolver) })
         tracksList.layoutManager = LinearLayoutManager(this)
         tracksList.adapter = trackAdapter
         trackAdapter.updateTracks(tracks)
