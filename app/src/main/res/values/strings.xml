@@ -3,4 +3,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="search">Поиск</string>
+    <string name="add_to_favorites">Добавить в избранное</string>
+    <string name="add_to_queue">Добавить в очередь</string>
+    <string name="add_to_playlist">Добавить в плейлист</string>
+    <string name="delete">Удалить</string>
 </resources>

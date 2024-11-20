@@ -46,18 +46,22 @@
             android:id="@+id/equalizerView"
             android:layout_width="40dp"
             android:layout_height="24dp"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"/>
 
-        <ImageView
+        <ImageButton
             android:id="@+id/replyImageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@null"
             android:scaleX="-1"
+            android:layout_marginRight="4dp"
             android:src="@drawable/baseline_reply_24"
             app:tint="@color/gray" />
 
-        <ImageView
+        <ImageButton
+            android:id="@+id/contextMenuImageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@null"

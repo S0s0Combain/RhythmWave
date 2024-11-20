@@ -38,14 +38,16 @@ class SearchFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_search, container, false)
         searchEditText = view.findViewById(R.id.searchEditText)
         searchRecyclerView = view.findViewById(R.id.searchRecyclerView)
+        val spaceInPixels = resources.getDimensionPixelSize(R.dimen.space_between_items)
+        searchRecyclerView.addItemDecoration(SpacesItemDecoration(spaceInPixels))
         noResultsTextView = view.findViewById(R.id.noResultsTextView)
         downloadButton = view.findViewById(R.id.downloadButton)
 
         searchAdapter = TrackAdapter(onTrackClick = { track ->
             // Handle track click
         }, onShareClick = { track ->
-            // Handle share click
-        })
+
+        }, onDeleteTrack = {})
         searchRecyclerView.layoutManager = LinearLayoutManager(context)
         searchRecyclerView.adapter = searchAdapter
 

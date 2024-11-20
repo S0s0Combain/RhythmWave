@@ -8,28 +8,37 @@
     android:background="@color/dark_background"
     tools:context=".MainActivity">
 
-    <ImageButton
-        android:id="@+id/equalizerImageButton"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:src="@drawable/baseline_equalizer_24"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/searchEditText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:clickable="true"
-        android:focusable="false"
-        android:hint="@string/search"
-        android:textColor="@color/light_gray"
-        android:textColorHint="@color/gray"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageButton"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/equalizerImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="4dp"
+            android:background="@null"
+            android:src="@drawable/baseline_equalizer_24"
+            app:tint="@color/light_gray" />
+
+        <EditText
+            android:id="@+id/searchEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:clickable="true"
+            android:focusable="false"
+            android:hint="@string/search"
+            android:textColor="@color/light_gray"
+            android:textColorHint="@color/gray" />
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/searchRecyclerView"
@@ -38,7 +47,7 @@
         app:layout_constraintBottom_toTopOf="@id/trackControlLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchEditText" />
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/trackControlLayout"

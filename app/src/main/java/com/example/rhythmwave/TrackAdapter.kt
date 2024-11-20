@@ -4,7 +4,9 @@ import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -12,7 +14,8 @@ import androidx.recyclerview.widget.RecyclerView
 
 class TrackAdapter(
     private val onTrackClick: (Track) -> Unit,
-    private val onShareClick: (Track) -> Unit
+    private val onShareClick: (Track) -> Unit,
+    private val onDeleteTrack: (Track) -> Unit
 ) : RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
 
     private var tracks: List<Track> = emptyList()
@@ -24,6 +27,7 @@ class TrackAdapter(
         val trackImageView = itemView.findViewById<ImageView>(R.id.trackImage)
         val equalizerView = itemView.findViewById<EqualizerView>(R.id.equalizerView)
         val replyImageView = itemView.findViewById<ImageView>(R.id.replyImageView)
+        val contextMenuImageView = itemView.findViewById<ImageButton>(R.id.contextMenuImageView)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
@@ -49,6 +53,7 @@ class TrackAdapter(
 
         holder.itemView.setOnClickListener { onTrackClick(track) }
         holder.replyImageView.setOnClickListener { onShareClick(track) }
+        holder.contextMenuImageView.setOnClickListener { showContextMenu(holder.contextMenuImageView, track) }
 
         if (track == currentTrack) {
             holder.titleTextView.setTextColor(
@@ -67,6 +72,21 @@ class TrackAdapter(
             )
             holder.equalizerView.visibility = View.GONE
         }
+    }
+
+    private fun showContextMenu(view: View, track: Track) {
+        val popupMenu = PopupMenu(view.context, view)
+        popupMenu.menuInflater.inflate(R.menu.context_menu, popupMenu.menu)
+        popupMenu.setOnMenuItemClickListener { item ->
+            when(item.itemId){
+                R.id.menu_delete -> {
+                    onDeleteTrack(track)
+                    true
+                }
+                else -> false
+            }
+        }
+        popupMenu.show()
     }
 
     fun updateTracks(newTracks: List<Track>) {

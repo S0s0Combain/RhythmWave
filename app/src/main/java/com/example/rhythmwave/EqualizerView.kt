@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import kotlin.random.Random
@@ -26,6 +27,7 @@ class EqualizerView(context: Context, attrs: AttributeSet? = null) : View(contex
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val height = height.toFloat()
+        Log.d("MyLog", height.toString())
         val width = width.toFloat()
         val startX = (width - (barWidth + barSpacing) * bars.size + barSpacing)
 

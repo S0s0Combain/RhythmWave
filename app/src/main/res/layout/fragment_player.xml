@@ -30,6 +30,7 @@
         android:id="@+id/visualizationView"
         android:layout_width="match_parent"
         android:layout_height="300dp"
+        app:layout_constraintBottom_toTopOf="@id/titleTextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -41,34 +42,40 @@
         android:textColor="@color/light_gray"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/visualizationView" />
+        app:layout_constraintBottom_toTopOf="@+id/artistTextView"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/artistTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/titleTextView"
+        android:layout_marginBottom="16dp"
         android:textColor="@color/light_gray"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/titleTextView" />
+        app:layout_constraintBottom_toTopOf="@+id/fragmentSeekBar"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <SeekBar
         android:id="@+id/fragmentSeekBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/artistTextView" />
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:gravity="center"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/fragmentSeekBar">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/visualizationView">
 
         <ImageButton
             android:id="@+id/prevButton"

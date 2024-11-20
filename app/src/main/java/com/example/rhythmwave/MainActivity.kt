@@ -99,6 +99,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
                 .replace(R.id.fragmentContainer, searchFragment).addToBackStack(null).commit()
             fragmentContainer.visibility = View.VISIBLE
         }
+        equalizerImageButton.setOnClickListener { createEqualizerActivity() }
 
         if (ContextCompat.checkSelfPermission(
                 this,
@@ -196,28 +197,32 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
 
         musicService?.setTrackList(tracks)
 
-        trackAdapter = TrackAdapter(onTrackClick = { track ->
-            if (musicService?.getCurrentTrack() == track) {
-                if (musicService?.isPlaying() == true) {
-                    musicService?.pauseTrack()
+        trackAdapter = TrackAdapter(
+            onTrackClick = { track ->
+                if (musicService?.getCurrentTrack() == track) {
+                    if (musicService?.isPlaying() == true) {
+                        musicService?.pauseTrack()
+                    } else {
+                        musicService?.resumeTrack()
+                        showTrackControl(track)
+                        fragmentContainer.visibility = View.VISIBLE
+                        supportFragmentManager.beginTransaction()
+                            .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
+                            .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null)
+                            .commit()
+                    }
                 } else {
-                    musicService?.resumeTrack()
-                    showTrackControl(track)
+                    musicService?.playTrack(track)
                     fragmentContainer.visibility = View.VISIBLE
                     supportFragmentManager.beginTransaction()
                         .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
                         .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null)
                         .commit()
+                    showTrackControl(track)
                 }
-            } else {
-                musicService?.playTrack(track)
-                fragmentContainer.visibility = View.VISIBLE
-                supportFragmentManager.beginTransaction()
-                    .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
-                    .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null).commit()
-                showTrackControl(track)
-            }
-        }, onShareClick = { track -> TrackUtils.shareTrack(this, track, contentResolver) })
+            },
+            onShareClick = { track -> TrackUtils.shareTrack(this, track, contentResolver) },
+            onDeleteTrack = { track -> deleteTrack(track) })
         tracksList.layoutManager = LinearLayoutManager(this)
         tracksList.adapter = trackAdapter
         trackAdapter.updateTracks(tracks)
@@ -306,5 +311,24 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
             musicService?.getCurrentPosition() ?: 0,
             musicService?.getCurrentTrack()?.duration ?: 0
         )
+    }
+
+    private fun createEqualizerActivity() {
+        val intent = Intent(this, EqualizerActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun deleteTrack(track: Track) {
+        val selection = "${MediaStore.Audio.Media._ID} = ?"
+        val selectionArgs = arrayOf(track.id.toString())
+        contentResolver.delete(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            selection,
+            selectionArgs
+        )
+
+        val updatedTrackList = musicService?.getTrackList()?.filter { it.id != track.id } ?: emptyList()
+        musicService?.setTrackList(updatedTrackList)
+        trackAdapter.updateTracks(updatedTrackList)
     }
 }
