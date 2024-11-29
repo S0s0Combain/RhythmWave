@@ -1,18 +1,14 @@
 package com.example.rhythmwave
 
 import android.annotation.SuppressLint
-import android.gesture.Gesture
 import android.media.audiofx.Visualizer
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.GestureDetector
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewAnimationUtils
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -21,6 +17,7 @@ import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
+import androidx.fragment.app.Fragment
 
 class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     private lateinit var buttonDown: ImageButton
@@ -33,7 +30,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     private lateinit var gestureDetector: GestureDetector
     private lateinit var visualizationView: VisualizationView
     private var visualizer: Visualizer? = null
-    private var musicService: MusicService? = null
+    var musicService: MusicService? = null
     private val handler = Handler(Looper.getMainLooper())
     private val updateSeekBarRunnable = object : Runnable {
         override fun run() {
@@ -81,9 +78,8 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
             true
         }
 
-        musicService = (activity as MainActivity).musicService
+        musicService
         visualizer = Visualizer(musicService?.getAudioSessionId()!!).apply {
-            //captureSize = Visualizer.getCaptureSizeRange()[1]
             captureSize = 512
             scalingMode = Visualizer.SCALING_MODE_NORMALIZED
             measurementMode = Visualizer.MEASUREMENT_MODE_NONE
@@ -136,7 +132,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
 
             override fun onAnimationEnd(animation: Animation?) {
                 fragmentContainer.visibility = View.GONE
-                parentFragmentManager.popBackStack()
+                requireActivity().supportFragmentManager.popBackStack()
             }
 
             override fun onAnimationRepeat(animation: Animation?) {}
