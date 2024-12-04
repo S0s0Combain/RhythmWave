@@ -1,52 +1,34 @@
 package com.example.rhythmwave
 
-import android.Manifest
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.content.pm.PackageManager
-import android.database.Cursor
-import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
-import android.provider.MediaStore
 import android.util.Log
 import android.view.View
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.SearchView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import java.io.ByteArrayOutputStream
+import androidx.fragment.app.Fragment
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 
-class MainActivity : AppCompatActivity(), TrackControlCallback {
-    private lateinit var tracksList: RecyclerView
-    private lateinit var fragmentContainer: FrameLayout
-    private lateinit var trackControlLayout: ConstraintLayout
-    private lateinit var trackImage: ImageView
-    private lateinit var trackTitleTextView: TextView
-    private lateinit var artistTextView: TextView
-    private lateinit var prevButton: ImageButton
-    private lateinit var pauseButton: ImageButton
-    private lateinit var nextButton: ImageButton
+class MainActivity : AppCompatActivity() {
+
     private lateinit var searchEditText: EditText
+    private lateinit var fragmentContainer: FrameLayout
     private lateinit var equalizerImageButton: ImageButton
     var musicService: MusicService? = null
     private var isBound = false
-    private lateinit var trackAdapter: TrackAdapter
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -54,8 +36,6 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
             val binder = service as MusicService.MusicServiceBinder
             musicService = binder.getService()
             isBound = true
-            musicService?.setTrackControlCallback(this@MainActivity)
-            loadTracks()
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -74,23 +54,28 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
             insets
         }
 
-        tracksList = findViewById(R.id.searchRecyclerView)
-        val spaceInPixels = resources.getDimensionPixelSize(R.dimen.space_between_items)
-        tracksList.addItemDecoration(SpacesItemDecoration(spaceInPixels))
-        trackControlLayout = findViewById(R.id.trackControlLayout)
-        trackImage = findViewById(R.id.trackImage)
-        trackTitleTextView = findViewById(R.id.trackTitleTextView)
-        artistTextView = findViewById(R.id.artistTextView)
-        prevButton = findViewById(R.id.prevButton)
-        pauseButton = findViewById(R.id.pauseButton)
-        nextButton = findViewById(R.id.nextButton)
-        fragmentContainer = findViewById(R.id.fragmentContainer)
+        val tabLayout: TabLayout = findViewById(R.id.tabLayout)
+        val viewPager: ViewPager2 = findViewById(R.id.viewPager)
         searchEditText = findViewById(R.id.searchEditText)
+        fragmentContainer = findViewById(R.id.fragmentContainer)
         equalizerImageButton = findViewById(R.id.equalizerImageButton)
 
-        prevButton.setOnClickListener { musicService?.previousTrack() }
-        pauseButton.setOnClickListener { musicService?.togglePlayPause() }
-        nextButton.setOnClickListener { musicService?.nextTrack() }
+        viewPager.adapter = ViewPagerAdapter(this)
+
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            when (position) {
+                0 -> tab.text = "Tracks"
+                1 -> tab.text = "Empty 1"
+                2 -> tab.text = "Empty 2"
+            }
+        }.attach()
+
+        bindService(
+            Intent(this, MusicService::class.java),
+            serviceConnection,
+            Context.BIND_AUTO_CREATE
+        )
+
         searchEditText.setOnClickListener {
             val searchFragment = SearchFragment()
             searchFragment.setTrackList(musicService?.getTrackList() ?: listOf())
@@ -100,41 +85,6 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
             fragmentContainer.visibility = View.VISIBLE
         }
         equalizerImageButton.setOnClickListener { createEqualizerActivity() }
-
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_MEDIA_AUDIO
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.READ_MEDIA_AUDIO),
-                1
-            )
-            Log.d("MyLog", "разрешения не предоставлены")
-        } else {
-            Log.d("MyLog", "разрешения предоставлены")
-            bindService(
-                Intent(this, MusicService::class.java),
-                serviceConnection,
-                Context.BIND_AUTO_CREATE
-            )
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 1 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            bindService(
-                Intent(this, MusicService::class.java),
-                serviceConnection,
-                Context.BIND_AUTO_CREATE
-            )
-        }
     }
 
     override fun onDestroy() {
@@ -145,190 +95,19 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
         }
     }
 
-    private fun loadTracks() {
-        Log.d("MyLog", "Функция вызвана")
-        val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0"
-        Log.d("MyLog", selection)
-        val projection = arrayOf(
-            MediaStore.Audio.Media.TITLE,
-            MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.DURATION,
-            MediaStore.Audio.Media._ID,
-            MediaStore.Audio.Media.MIME_TYPE
-        )
-        Log.d("MyLog", projection.toString())
-        val cursor: Cursor? = contentResolver.query(
-            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-            projection,
-            selection,
-            null,
-            null
-        )
+    private class ViewPagerAdapter(fa: AppCompatActivity) : FragmentStateAdapter(fa) {
+        override fun getItemCount(): Int = 3
 
-        val tracks = mutableListOf<Track>()
-        cursor?.use {
-            if (it.moveToFirst()) {
-                do {
-                    val title =
-                        cursor.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE))
-                    val artist =
-                        cursor.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST))
-                    val duration =
-                        cursor.getInt(it.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION))
-                    val id = cursor.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
-                    val mimeType =
-                        cursor.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE))
-
-                    if (duration < 30000) {
-                        continue
-                    }
-
-                    if (mimeType != "audio/mpeg") {
-                        continue
-                    }
-
-                    val albumArt = getAlbumArt(this, id)
-                    tracks.add(Track(title, artist, duration, id, albumArt))
-                } while (it.moveToNext())
-            } else {
-                Log.d("MyLog", "Треки не найдены")
+        override fun createFragment(position: Int): Fragment {
+            return when (position) {
+                0 -> TrackListFragment()
+                else -> Fragment() // Пустые фрагменты
             }
         }
-
-        musicService?.setTrackList(tracks)
-
-        trackAdapter = TrackAdapter(
-            onTrackClick = { track ->
-                if (musicService?.getCurrentTrack() == track) {
-                    if (musicService?.isPlaying() == true) {
-                        musicService?.pauseTrack()
-                    } else {
-                        musicService?.resumeTrack()
-                        showTrackControl(track)
-                        fragmentContainer.visibility = View.VISIBLE
-                        supportFragmentManager.beginTransaction()
-                            .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
-                            .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null)
-                            .commit()
-                    }
-                } else {
-                    musicService?.playTrack(track)
-                    fragmentContainer.visibility = View.VISIBLE
-                    supportFragmentManager.beginTransaction()
-                        .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
-                        .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null)
-                        .commit()
-                    showTrackControl(track)
-                }
-            },
-            onShareClick = { track -> TrackUtils.shareTrack(this, track, contentResolver) },
-            onDeleteTrack = { track -> deleteTrack(track) })
-        tracksList.layoutManager = LinearLayoutManager(this)
-        tracksList.adapter = trackAdapter
-        trackAdapter.updateTracks(tracks)
-    }
-
-    private fun getAlbumArt(context: Context, trackId: Long): ByteArray? {
-        val uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-        val selection = "${MediaStore.Audio.Media._ID} = ?"
-        val selectionArgs = arrayOf(trackId.toString())
-        val projection = arrayOf(MediaStore.Audio.Media.ALBUM_ID)
-
-        var albumId: Long? = null
-        context.contentResolver.query(uri, projection, selection, selectionArgs, null)
-            ?.use { cursor ->
-                if (cursor.moveToFirst()) {
-                    albumId =
-                        cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
-                }
-            }
-
-        if (albumId != null) {
-            val albumArtUri: Uri = Uri.parse("content://media/external/audio/albumart/$albumId")
-            return try {
-                val inputStream = context.contentResolver.openInputStream(albumArtUri)
-                val byteArrayOutputStream = ByteArrayOutputStream()
-                inputStream?.copyTo(byteArrayOutputStream)
-                byteArrayOutputStream.toByteArray()
-            } catch (e: Exception) {
-                null
-            }
-        }
-        return null
-    }
-
-    override fun onBackPressed() {
-        if (fragmentContainer.visibility == View.VISIBLE) {
-            val animation = AnimationUtils.loadAnimation(this, R.anim.fade_out)
-            animation.setAnimationListener(object : Animation.AnimationListener {
-                override fun onAnimationStart(animation: Animation?) {}
-
-                override fun onAnimationEnd(animation: Animation?) {
-                    fragmentContainer.visibility = View.GONE
-                    supportFragmentManager.popBackStack()
-                }
-
-                override fun onAnimationRepeat(animation: Animation?) {}
-            })
-            fragmentContainer.startAnimation(animation)
-        } else {
-            super.onBackPressed()
-        }
-    }
-
-    private fun showTrackControl(track: Track) {
-        trackControlLayout.visibility = View.VISIBLE
-        if (track.albumArt != null) {
-            val bitmap =
-                BitmapFactory.decodeByteArray(track.albumArt, 0, track.albumArt.size)
-            val roundedBitmap = ImageUtils.roundCorner(bitmap, 40f)
-            trackImage.setImageBitmap(roundedBitmap)
-        }
-        trackTitleTextView.text = track.title
-        artistTextView.text = track.artist
-
-        trackAdapter.updateCurrentTrack(track)
-
-        val playerFragment =
-            supportFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
-        playerFragment?.updateTrackInfo(track)
-    }
-
-    override fun onTrackChanged(track: Track) {
-        showTrackControl(track)
-    }
-
-    override fun onPlaybackStateChanged(isPlaying: Boolean) {
-        if (isPlaying) {
-            pauseButton.setImageResource(R.drawable.baseline_pause_24)
-        } else {
-            pauseButton.setImageResource(R.drawable.baseline_play_arrow_24)
-        }
-
-        val playerFragment =
-            supportFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
-        playerFragment?.updateSeekbar(
-            musicService?.getCurrentPosition() ?: 0,
-            musicService?.getCurrentTrack()?.duration ?: 0
-        )
     }
 
     private fun createEqualizerActivity() {
         val intent = Intent(this, EqualizerActivity::class.java)
         startActivity(intent)
-    }
-
-    private fun deleteTrack(track: Track) {
-        val selection = "${MediaStore.Audio.Media._ID} = ?"
-        val selectionArgs = arrayOf(track.id.toString())
-        contentResolver.delete(
-            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-            selection,
-            selectionArgs
-        )
-
-        val updatedTrackList = musicService?.getTrackList()?.filter { it.id != track.id } ?: emptyList()
-        musicService?.setTrackList(updatedTrackList)
-        trackAdapter.updateTracks(updatedTrackList)
     }
 }
