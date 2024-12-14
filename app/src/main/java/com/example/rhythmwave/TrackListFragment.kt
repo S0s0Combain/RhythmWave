@@ -43,7 +43,6 @@ class TrackListFragment : Fragment(), TrackControlCallback {
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            Log.d("MyLog", "Сервис подключен")
             val binder = service as MusicService.MusicServiceBinder
             musicService = binder.getService()
             isBound = true
@@ -52,7 +51,6 @@ class TrackListFragment : Fragment(), TrackControlCallback {
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            Log.d("MyLog", "Сервис не подключен")
             isBound = false
         }
     }
@@ -61,12 +59,12 @@ class TrackListFragment : Fragment(), TrackControlCallback {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        musicService = (activity as MainActivity).musicService
         return inflater.inflate(R.layout.fragment_track_list, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         tracksList = view.findViewById(R.id.searchRecyclerView)
         val spaceInPixels = resources.getDimensionPixelSize(R.dimen.space_between_items)
         tracksList.addItemDecoration(SpacesItemDecoration(spaceInPixels))
@@ -99,9 +97,7 @@ class TrackListFragment : Fragment(), TrackControlCallback {
     }
 
     private fun loadTracks() {
-        Log.d("MyLog", "Функция вызвана")
         val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0"
-        Log.d("MyLog", selection)
         val projection = arrayOf(
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ARTIST,
@@ -109,7 +105,6 @@ class TrackListFragment : Fragment(), TrackControlCallback {
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.MIME_TYPE
         )
-        Log.d("MyLog", projection.toString())
         val cursor: Cursor? = context?.contentResolver?.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             projection,
@@ -159,18 +154,12 @@ class TrackListFragment : Fragment(), TrackControlCallback {
                         musicService?.resumeTrack()
                         showTrackControl(track)
                         fragmentContainer.visibility = View.VISIBLE
-                        parentFragmentManager.beginTransaction()
-                            .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
-                            .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null)
-                            .commit()
+                        openPlayerFragment(musicService)
                     }
                 } else {
                     musicService?.playTrack(track)
                     fragmentContainer.visibility = View.VISIBLE
-                    parentFragmentManager.beginTransaction()
-                        .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
-                        .replace(R.id.fragmentContainer, PlayerFragment()).addToBackStack(null)
-                        .commit()
+                    openPlayerFragment(musicService)
                     showTrackControl(track)
                 }
             },
@@ -260,5 +249,16 @@ class TrackListFragment : Fragment(), TrackControlCallback {
         val updatedTrackList = musicService?.getTrackList()?.filter { it.id != track.id } ?: emptyList()
         musicService?.setTrackList(updatedTrackList)
         trackAdapter.updateTracks(updatedTrackList)
+    }
+
+    private fun openPlayerFragment(musicService: MusicService?) {
+        val playerFragment = PlayerFragment().apply {
+            this.musicService = musicService
+        }
+        requireActivity().supportFragmentManager.beginTransaction()
+            .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
+            .replace(R.id.fragmentContainer, playerFragment)
+            .addToBackStack(null)
+            .commit()
     }
 }

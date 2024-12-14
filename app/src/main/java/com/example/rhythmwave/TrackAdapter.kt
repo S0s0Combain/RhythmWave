@@ -74,6 +74,10 @@ class TrackAdapter(
         }
     }
 
+    fun getTracks(): List<Track> {
+        return tracks
+    }
+
     private fun showContextMenu(view: View, track: Track) {
         val popupMenu = PopupMenu(view.context, view)
         popupMenu.menuInflater.inflate(R.menu.context_menu, popupMenu.menu)

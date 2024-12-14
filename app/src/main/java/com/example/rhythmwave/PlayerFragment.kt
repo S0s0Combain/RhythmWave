@@ -5,6 +5,7 @@ import android.media.audiofx.Visualizer
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -78,39 +79,42 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
             true
         }
 
-        musicService
-        visualizer = Visualizer(musicService?.getAudioSessionId()!!).apply {
-            captureSize = 512
-            scalingMode = Visualizer.SCALING_MODE_NORMALIZED
-            measurementMode = Visualizer.MEASUREMENT_MODE_NONE
-            setDataCaptureListener(object : Visualizer.OnDataCaptureListener {
-                override fun onWaveFormDataCapture(
-                    visualizer: Visualizer?,
-                    waveform: ByteArray?,
-                    samplingRate: Int
-                ) {
-                    // Not used
-                }
-
-                override fun onFftDataCapture(
-                    visualizer: Visualizer?,
-                    fft: ByteArray?,
-                    samplingRate: Int
-                ) {
-                    fft?.let { visualizationView.updateVisualizer(it) }
-                }
-            }, Visualizer.getMaxCaptureRate() / 2, true, true)
-            enabled = true
-        }
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        //Log.d("MyLog", (musicService == null).toString())
         val currentTrack = musicService?.getCurrentTrack()
         if (currentTrack != null) {
             updateTrackInfo(currentTrack)
             updateSeekbar(musicService?.getCurrentPosition() ?: 0, currentTrack.duration)
+        }
+        // Initialize Visualizer here
+        musicService?.let {
+            visualizer = Visualizer(it.getAudioSessionId()).apply {
+                captureSize = 512
+                scalingMode = Visualizer.SCALING_MODE_NORMALIZED
+                measurementMode = Visualizer.MEASUREMENT_MODE_NONE
+                setDataCaptureListener(object : Visualizer.OnDataCaptureListener {
+                    override fun onWaveFormDataCapture(
+                        visualizer: Visualizer?,
+                        waveform: ByteArray?,
+                        samplingRate: Int
+                    ) {
+                        // Not used
+                    }
+
+                    override fun onFftDataCapture(
+                        visualizer: Visualizer?,
+                        fft: ByteArray?,
+                        samplingRate: Int
+                    ) {
+                        fft?.let { visualizationView.updateVisualizer(it) }
+                    }
+                }, Visualizer.getMaxCaptureRate() / 2, true, true)
+                enabled = true
+            }
         }
     }
 

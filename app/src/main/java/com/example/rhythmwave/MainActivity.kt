@@ -4,16 +4,18 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageButton
-import android.widget.SearchView
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -22,24 +24,29 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), TrackControlCallback {
 
     private lateinit var searchEditText: EditText
     private lateinit var fragmentContainer: FrameLayout
     private lateinit var equalizerImageButton: ImageButton
+    lateinit var trackControlLayout: ConstraintLayout
+    private lateinit var trackImage: ImageView
+    private lateinit var trackTitleTextView: TextView
+    private lateinit var artistTextView: TextView
+    private lateinit var prevButton: ImageButton
+    private lateinit var pauseButton: ImageButton
+    private lateinit var nextButton: ImageButton
     var musicService: MusicService? = null
     private var isBound = false
 
-    private val serviceConnection = object : ServiceConnection {
+    val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            Log.d("MyLog", "Сервис подключен")
             val binder = service as MusicService.MusicServiceBinder
             musicService = binder.getService()
             isBound = true
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            Log.d("MyLog", "Сервис не подключен")
             isBound = false
         }
     }
@@ -59,14 +66,21 @@ class MainActivity : AppCompatActivity() {
         searchEditText = findViewById(R.id.searchEditText)
         fragmentContainer = findViewById(R.id.fragmentContainer)
         equalizerImageButton = findViewById(R.id.equalizerImageButton)
+        trackControlLayout = findViewById(R.id.trackControlLayout)
+        trackImage = findViewById(R.id.trackImage)
+        trackTitleTextView = findViewById(R.id.trackTitleTextView)
+        artistTextView = findViewById(R.id.artistTextView)
+        prevButton = findViewById(R.id.prevButton)
+        pauseButton = findViewById(R.id.pauseButton)
+        nextButton = findViewById(R.id.nextButton)
 
         viewPager.adapter = ViewPagerAdapter(this)
 
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             when (position) {
-                0 -> tab.text = "Tracks"
-                1 -> tab.text = "Empty 1"
-                2 -> tab.text = "Empty 2"
+                0 -> tab.text = "Треки"
+                1 -> tab.text = "Альбомы"
+                2 -> tab.text = "Исполнители"
             }
         }.attach()
 
@@ -85,6 +99,10 @@ class MainActivity : AppCompatActivity() {
             fragmentContainer.visibility = View.VISIBLE
         }
         equalizerImageButton.setOnClickListener { createEqualizerActivity() }
+
+        prevButton.setOnClickListener { musicService?.previousTrack() }
+        pauseButton.setOnClickListener { musicService?.togglePlayPause() }
+        nextButton.setOnClickListener { musicService?.nextTrack() }
     }
 
     override fun onDestroy() {
@@ -101,6 +119,7 @@ class MainActivity : AppCompatActivity() {
         override fun createFragment(position: Int): Fragment {
             return when (position) {
                 0 -> TrackListFragment()
+                1 -> AlbumsFragment()
                 else -> Fragment() // Пустые фрагменты
             }
         }
@@ -109,5 +128,40 @@ class MainActivity : AppCompatActivity() {
     private fun createEqualizerActivity() {
         val intent = Intent(this, EqualizerActivity::class.java)
         startActivity(intent)
+    }
+
+    override fun onTrackChanged(track: Track) {
+        showTrackControl(track)
+    }
+
+    override fun onPlaybackStateChanged(isPlaying: Boolean) {
+        if (isPlaying) {
+            pauseButton.setImageResource(R.drawable.baseline_pause_24)
+        } else {
+            pauseButton.setImageResource(R.drawable.baseline_play_arrow_24)
+        }
+
+        val playerFragment =
+            supportFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+        playerFragment?.updateSeekbar(
+            musicService?.getCurrentPosition() ?: 0,
+            musicService?.getCurrentTrack()?.duration ?: 0
+        )
+    }
+
+    fun showTrackControl(track: Track) {
+        trackControlLayout.visibility = View.VISIBLE
+        if (track.albumArt != null) {
+            val bitmap =
+                BitmapFactory.decodeByteArray(track.albumArt, 0, track.albumArt.size)
+            val roundedBitmap = ImageUtils.roundCorner(bitmap, 40f)
+            trackImage.setImageBitmap(roundedBitmap)
+        }
+        trackTitleTextView.text = track.title
+        artistTextView.text = track.artist
+
+        val playerFragment =
+            supportFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+        playerFragment?.updateTrackInfo(track)
     }
 }

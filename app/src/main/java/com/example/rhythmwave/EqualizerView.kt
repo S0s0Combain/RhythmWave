@@ -27,7 +27,6 @@ class EqualizerView(context: Context, attrs: AttributeSet? = null) : View(contex
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val height = height.toFloat()
-        Log.d("MyLog", height.toString())
         val width = width.toFloat()
         val startX = (width - (barWidth + barSpacing) * bars.size + barSpacing)
 
