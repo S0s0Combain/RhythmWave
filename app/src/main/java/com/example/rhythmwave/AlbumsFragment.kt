@@ -29,7 +29,7 @@ class AlbumsFragment : Fragment() {
         fragmentContainer = (activity as MainActivity).findViewById(R.id.fragmentContainer)
         albumAdapter = AlbumAdapter(
             onAlbumClick = { album ->
-                val albumTracksFragment = AlbumTracksFragment().apply {
+                val albumTracksFragment = TracksFragment().apply {
                     arguments = Bundle().apply {
                         putParcelable("album", album)
                     }

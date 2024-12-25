@@ -24,7 +24,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
-class MainActivity : AppCompatActivity(), TrackControlCallback {
+class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
 
     private lateinit var searchEditText: EditText
     private lateinit var fragmentContainer: FrameLayout
@@ -97,6 +97,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
                 .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
                 .replace(R.id.fragmentContainer, searchFragment).addToBackStack(null).commit()
             fragmentContainer.visibility = View.VISIBLE
+            trackControlLayout.visibility = View.GONE
         }
         equalizerImageButton.setOnClickListener { createEqualizerActivity() }
 
@@ -120,7 +121,8 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
             return when (position) {
                 0 -> TrackListFragment()
                 1 -> AlbumsFragment()
-                else -> Fragment() // Пустые фрагменты
+                2 -> ArtistsFragment()
+                else -> Fragment()
             }
         }
     }
@@ -163,5 +165,22 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
         val playerFragment =
             supportFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
         playerFragment?.updateTrackInfo(track)
+    }
+
+    override fun onBackPressed() {
+        if (!backPressed()) {
+            super.onBackPressed()
+        }
+    }
+
+    override fun backPressed(): Boolean {
+        val fragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer)
+        return if (fragment is PlayerFragment) {
+            fragment.collapseFragment()
+            trackControlLayout.visibility = View.VISIBLE
+            true
+        } else {
+            false
+        }
     }
 }

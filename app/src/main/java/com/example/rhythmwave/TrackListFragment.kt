@@ -68,13 +68,13 @@ class TrackListFragment : Fragment(), TrackControlCallback {
         tracksList = view.findViewById(R.id.searchRecyclerView)
         val spaceInPixels = resources.getDimensionPixelSize(R.dimen.space_between_items)
         tracksList.addItemDecoration(SpacesItemDecoration(spaceInPixels))
-        trackControlLayout = view.findViewById(R.id.trackControlLayout)
-        trackImage = view.findViewById(R.id.trackImage)
-        trackTitleTextView = view.findViewById(R.id.trackTitleTextView)
-        artistTextView = view.findViewById(R.id.artistTextView)
-        prevButton = view.findViewById(R.id.prevButton)
-        pauseButton = view.findViewById(R.id.pauseButton)
-        nextButton = view.findViewById(R.id.nextButton)
+        trackControlLayout = (activity as MainActivity).findViewById(R.id.trackControlLayout)
+        trackImage = (activity as MainActivity).findViewById(R.id.trackImage)
+        trackTitleTextView = (activity as MainActivity).findViewById(R.id.trackTitleTextView)
+        artistTextView = (activity as MainActivity).findViewById(R.id.artistTextView)
+        prevButton = (activity as MainActivity).findViewById(R.id.prevButton)
+        pauseButton = (activity as MainActivity).findViewById(R.id.pauseButton)
+        nextButton = (activity as MainActivity).findViewById(R.id.nextButton)
         fragmentContainer = (activity as MainActivity).findViewById(R.id.fragmentContainer)
 
         prevButton.setOnClickListener { musicService?.previousTrack() }
@@ -152,7 +152,6 @@ class TrackListFragment : Fragment(), TrackControlCallback {
                         musicService?.pauseTrack()
                     } else {
                         musicService?.resumeTrack()
-                        showTrackControl(track)
                         fragmentContainer.visibility = View.VISIBLE
                         openPlayerFragment(musicService)
                     }
@@ -160,7 +159,6 @@ class TrackListFragment : Fragment(), TrackControlCallback {
                     musicService?.playTrack(track)
                     fragmentContainer.visibility = View.VISIBLE
                     openPlayerFragment(musicService)
-                    showTrackControl(track)
                 }
             },
             onShareClick = { track -> TrackUtils.shareTrack(requireContext(), track, requireContext().contentResolver) },
@@ -201,7 +199,7 @@ class TrackListFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onTrackChanged(track: Track) {
-        showTrackControl(track)
+        (activity as MainActivity).showTrackControl(track)
     }
 
     override fun onPlaybackStateChanged(isPlaying: Boolean) {
@@ -219,24 +217,6 @@ class TrackListFragment : Fragment(), TrackControlCallback {
         )
     }
 
-    private fun showTrackControl(track: Track) {
-        trackControlLayout.visibility = View.VISIBLE
-        if (track.albumArt != null) {
-            val bitmap =
-                BitmapFactory.decodeByteArray(track.albumArt, 0, track.albumArt.size)
-            val roundedBitmap = ImageUtils.roundCorner(bitmap, 40f)
-            trackImage.setImageBitmap(roundedBitmap)
-        }
-        trackTitleTextView.text = track.title
-        artistTextView.text = track.artist
-
-        trackAdapter.updateCurrentTrack(track)
-
-        val playerFragment =
-            parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
-        playerFragment?.updateTrackInfo(track)
-    }
-
     private fun deleteTrack(track: Track) {
         val selection = "${MediaStore.Audio.Media._ID} = ?"
         val selectionArgs = arrayOf(track.id.toString())
@@ -252,6 +232,7 @@ class TrackListFragment : Fragment(), TrackControlCallback {
     }
 
     private fun openPlayerFragment(musicService: MusicService?) {
+        trackControlLayout.visibility = View.GONE
         val playerFragment = PlayerFragment().apply {
             this.musicService = musicService
         }

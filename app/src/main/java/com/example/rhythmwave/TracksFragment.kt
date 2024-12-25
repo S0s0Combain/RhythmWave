@@ -8,16 +8,19 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.ByteArrayOutputStream
 
-class AlbumTracksFragment : Fragment(), TrackControlCallback {
+class TracksFragment : Fragment(), TrackControlCallback {
 
     private lateinit var tracksRecyclerView: RecyclerView
     private lateinit var trackAdapter: TrackAdapter
+    private lateinit var trackControlLayout: ConstraintLayout
     private var album: Album? = null
+    private var artist: Artist? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,8 +28,10 @@ class AlbumTracksFragment : Fragment(), TrackControlCallback {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_album_tracks, container, false)
         tracksRecyclerView = view.findViewById(R.id.tracksRecyclerView)
+        trackControlLayout = (activity as MainActivity).trackControlLayout
 
         album = arguments?.getParcelable("album")
+        artist = arguments?.getParcelable("artist")
 
         trackAdapter = TrackAdapter(
             onTrackClick = { track ->
@@ -46,8 +51,15 @@ class AlbumTracksFragment : Fragment(), TrackControlCallback {
     }
 
     private fun loadTracks() {
-        val selection = "${MediaStore.Audio.Media.ALBUM_ID} = ?"
-        val selectionArgs = arrayOf(album?.albumId.toString())
+        val selection: String = if (album != null) {
+            "${MediaStore.Audio.Media.ALBUM_ID} = ?"
+        } else if (artist != null) {
+            "${MediaStore.Audio.Media.ARTIST} = ?"
+        } else {
+            return
+        }
+
+        val selectionArgs = arrayOf(album?.albumId?.toString() ?: artist?.name)
         val projection = arrayOf(
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ARTIST,
@@ -73,11 +85,7 @@ class AlbumTracksFragment : Fragment(), TrackControlCallback {
                     val id = it.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
                     val mimeType = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE))
 
-                    if (duration < 30000) {
-                        continue
-                    }
-
-                    if (mimeType != "audio/mpeg") {
+                    if (duration < 30000 || mimeType != "audio/mpeg") {
                         continue
                     }
 
@@ -103,6 +111,7 @@ class AlbumTracksFragment : Fragment(), TrackControlCallback {
     }
 
     private fun openPlayerFragment(musicService: MusicService?) {
+        trackControlLayout.visibility = View.GONE
         val playerFragment = PlayerFragment().apply {
             this.musicService = musicService
         }

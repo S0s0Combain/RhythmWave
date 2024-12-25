@@ -42,7 +42,6 @@ class VisualizationView(context: Context, attrs: AttributeSet) : View(context, a
 
         val waveOffset = waveAnimator.animatedValue as Float
 
-        // Рисуем три волнистых круга для низких, средних и высоких частот
         drawWaveCircle(canvas, cx, cy, maxRadius, waveOffset, 0, fftData.size / 3, Color.RED, Color.MAGENTA)
         drawWaveCircle(canvas, cx, cy, maxRadius, waveOffset + PI.toFloat() / 2, fftData.size / 3, 2 * fftData.size / 3, Color.YELLOW, Color.YELLOW)
         drawWaveCircle(canvas, cx, cy, maxRadius, waveOffset + PI.toFloat(), 2 * fftData.size / 3, fftData.size, Color.GREEN, Color.CYAN)

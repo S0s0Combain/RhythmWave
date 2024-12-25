@@ -18,6 +18,7 @@ import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 
 class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
@@ -30,6 +31,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     private lateinit var fragmentSeekBar: SeekBar
     private lateinit var gestureDetector: GestureDetector
     private lateinit var visualizationView: VisualizationView
+    private lateinit var trackControlLayout: ConstraintLayout
     private var visualizer: Visualizer? = null
     var musicService: MusicService? = null
     private val handler = Handler(Looper.getMainLooper())
@@ -56,6 +58,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         nextButton = view.findViewById(R.id.nextButton)
         fragmentSeekBar = view.findViewById(R.id.fragmentSeekBar)
         visualizationView = view.findViewById(R.id.visualizationView)
+        trackControlLayout = (activity as MainActivity).findViewById(R.id.trackControlLayout)
 
         buttonDown.setOnClickListener { collapseFragment() }
         prevButton.setOnClickListener { musicService?.previousTrack() }
@@ -128,7 +131,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         handler.removeCallbacks(updateSeekBarRunnable)
     }
 
-    private fun collapseFragment() {
+    fun collapseFragment() {
         val fragmentContainer = requireActivity().findViewById<FrameLayout>(R.id.fragmentContainer)
         val animation = AnimationUtils.loadAnimation(context, R.anim.fade_out)
         animation.setAnimationListener(object : Animation.AnimationListener {
