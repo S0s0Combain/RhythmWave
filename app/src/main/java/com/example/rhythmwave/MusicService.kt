@@ -8,12 +8,13 @@ import android.os.IBinder
 import android.provider.MediaStore
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.Tracks
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
+import com.google.androidgamesdk.gametextinput.Listener
 
 class MusicService : Service() {
     private lateinit var exoPlayer: ExoPlayer
@@ -21,15 +22,28 @@ class MusicService : Service() {
     private var trackList: List<Track> = emptyList()
     private var currentTrackIndex: Int = 0
     private var trackControlCallback: TrackControlCallback? = null
+    private lateinit var equalizerHelper: EqualizerHelper
 
     private val binder = MusicServiceBinder()
 
+    companion object {
+        @Volatile
+        private var instance: MusicService? = null
+
+        fun getInstance(): MusicService? {
+            return instance
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
+        instance = this
         exoPlayer = SimpleExoPlayer.Builder(this).build()
-        exoPlayer.addListener(object : com.google.android.exoplayer2.Player.Listener {
+        equalizerHelper = EqualizerHelper(getAudioSessionId())
+
+        (exoPlayer as SimpleExoPlayer).addListener(object : Player.Listener {
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                if (playbackState == com.google.android.exoplayer2.Player.STATE_ENDED) {
+                if (playbackState == ExoPlayer.STATE_ENDED) {
                     nextTrack()
                 }
             }
@@ -42,6 +56,16 @@ class MusicService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? {
         return binder
+    }
+
+    fun applyEqualizerSettings(bassLevel: Int, trebleLevel: Int) {
+        if (::equalizerHelper.isInitialized) {
+            val bassBand = 0
+            val trebleBand = 1
+
+            equalizerHelper.setBandLevel(bassBand.toShort(), (bassLevel * 10).toShort())
+            equalizerHelper.setBandLevel(trebleBand.toShort(), (trebleLevel * 10).toShort())
+        }
     }
 
     fun playTrack(track: Track) {
@@ -121,8 +145,7 @@ class MusicService : Service() {
         trackControlCallback?.onPlaybackStateChanged(isPlaying)
     }
 
-
-    fun getAudioSessionId():Int{
+    fun getAudioSessionId(): Int {
         return exoPlayer.audioSessionId
     }
 
@@ -130,5 +153,14 @@ class MusicService : Service() {
 
     inner class MusicServiceBinder : Binder() {
         fun getService(): MusicService = this@MusicService
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        instance = null
+        if (::equalizerHelper.isInitialized) {
+            equalizerHelper.release()
+        }
+        exoPlayer.release()
     }
 }

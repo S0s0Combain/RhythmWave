@@ -77,6 +77,5 @@ class ArtistsFragment : Fragment() {
             .replace(R.id.fragmentContainer, artistTracksFragment)
             .addToBackStack(null)
             .commit()
-        fragmentContainer.visibility = View.VISIBLE
     }
 }

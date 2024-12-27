@@ -11,6 +11,9 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class TrackAdapter(
     private val onTrackClick: (Track) -> Unit,
@@ -85,6 +88,14 @@ class TrackAdapter(
             when(item.itemId){
                 R.id.menu_delete -> {
                     onDeleteTrack(track)
+                    true
+                }
+                R.id.menu_add_to_favorites -> {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        AppDatabase.getDatabase(view.context).favoriteTrackDao().insert(
+                            FavoriteTrack(track.id, track.title, track.artist, track.duration, track.albumArt)
+                        )
+                    }
                     true
                 }
                 else -> false

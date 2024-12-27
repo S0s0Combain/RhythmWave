@@ -39,7 +39,6 @@ class AlbumsFragment : Fragment() {
                     .replace(R.id.fragmentContainer, albumTracksFragment)
                     .addToBackStack(null)
                     .commit()
-                fragmentContainer.visibility = View.VISIBLE
             }
         )
         albumsRecyclerView.layoutManager = LinearLayoutManager(requireContext())

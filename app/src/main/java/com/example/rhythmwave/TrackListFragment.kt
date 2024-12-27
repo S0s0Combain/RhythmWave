@@ -59,7 +59,7 @@ class TrackListFragment : Fragment(), TrackControlCallback {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        musicService = (activity as MainActivity).musicService
+        musicService = MusicService.getInstance()
         return inflater.inflate(R.layout.fragment_track_list, container, false)
     }
 
@@ -152,12 +152,10 @@ class TrackListFragment : Fragment(), TrackControlCallback {
                         musicService?.pauseTrack()
                     } else {
                         musicService?.resumeTrack()
-                        fragmentContainer.visibility = View.VISIBLE
                         openPlayerFragment(musicService)
                     }
                 } else {
                     musicService?.playTrack(track)
-                    fragmentContainer.visibility = View.VISIBLE
                     openPlayerFragment(musicService)
                 }
             },

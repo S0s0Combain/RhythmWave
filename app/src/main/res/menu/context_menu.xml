@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/menuAddToFavorites"
+        android:id="@+id/menu_add_to_favorites"
         android:title="@string/add_to_favorites" />
     <item
         android:id="@+id/menu_add_to_queue"

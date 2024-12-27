@@ -35,9 +35,9 @@ class TracksFragment : Fragment(), TrackControlCallback {
 
         trackAdapter = TrackAdapter(
             onTrackClick = { track ->
-                (requireActivity() as MainActivity).musicService?.playTrack(track)
+                MusicService.getInstance()?.playTrack(track)
                 (requireActivity() as MainActivity).showTrackControl(track)
-                openPlayerFragment((requireActivity() as MainActivity).musicService)
+                openPlayerFragment(MusicService.getInstance())
             },
             onShareClick = { track -> TrackUtils.shareTrack(requireContext(), track, requireContext().contentResolver) },
             onDeleteTrack = { track -> deleteTrack(track) }

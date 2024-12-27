@@ -15,6 +15,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -36,20 +37,7 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
     private lateinit var prevButton: ImageButton
     private lateinit var pauseButton: ImageButton
     private lateinit var nextButton: ImageButton
-    var musicService: MusicService? = null
-    private var isBound = false
-
-    val serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as MusicService.MusicServiceBinder
-            musicService = binder.getService()
-            isBound = true
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            isBound = false
-        }
-    }
+    private lateinit var favoritesCardView: CardView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,6 +61,7 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
         prevButton = findViewById(R.id.prevButton)
         pauseButton = findViewById(R.id.pauseButton)
         nextButton = findViewById(R.id.nextButton)
+        favoritesCardView = findViewById(R.id.favoritesCardView)
 
         viewPager.adapter = ViewPagerAdapter(this)
 
@@ -84,34 +73,29 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
             }
         }.attach()
 
-        bindService(
-            Intent(this, MusicService::class.java),
-            serviceConnection,
-            Context.BIND_AUTO_CREATE
-        )
-
         searchEditText.setOnClickListener {
             val searchFragment = SearchFragment()
-            searchFragment.setTrackList(musicService?.getTrackList() ?: listOf())
+            searchFragment.setTrackList(MusicService.getInstance()?.getTrackList() ?: listOf())
             supportFragmentManager.beginTransaction()
                 .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
                 .replace(R.id.fragmentContainer, searchFragment).addToBackStack(null).commit()
-            fragmentContainer.visibility = View.VISIBLE
             trackControlLayout.visibility = View.GONE
         }
         equalizerImageButton.setOnClickListener { createEqualizerActivity() }
 
-        prevButton.setOnClickListener { musicService?.previousTrack() }
-        pauseButton.setOnClickListener { musicService?.togglePlayPause() }
-        nextButton.setOnClickListener { musicService?.nextTrack() }
+        prevButton.setOnClickListener { MusicService.getInstance()?.previousTrack() }
+        pauseButton.setOnClickListener { MusicService.getInstance()?.togglePlayPause() }
+        nextButton.setOnClickListener { MusicService.getInstance()?.nextTrack() }
+        favoritesCardView.setOnClickListener { openFavoritesFragment() }
+
+        applyEqualizerSettings()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        if (isBound) {
-            unbindService(serviceConnection)
-            isBound = false
-        }
+    private fun openFavoritesFragment() {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, FavoritesFragment()).addToBackStack(null).commit()
+        trackControlLayout.visibility = View.GONE
+
     }
 
     private class ViewPagerAdapter(fa: AppCompatActivity) : FragmentStateAdapter(fa) {
@@ -146,8 +130,8 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
         val playerFragment =
             supportFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
         playerFragment?.updateSeekbar(
-            musicService?.getCurrentPosition() ?: 0,
-            musicService?.getCurrentTrack()?.duration ?: 0
+            MusicService.getInstance()?.getCurrentPosition() ?: 0,
+            MusicService.getInstance()?.getCurrentTrack()?.duration ?: 0
         )
     }
 
@@ -182,5 +166,13 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
         } else {
             false
         }
+    }
+
+    private fun applyEqualizerSettings() {
+        val sharedPreferences = getSharedPreferences("EqualizerSettings", MODE_PRIVATE)
+        val bassLevel = sharedPreferences.getInt("Bass", 0)
+        val trebleLevel = sharedPreferences.getInt("Treble", 0)
+
+        MusicService.getInstance()?.applyEqualizerSettings(bassLevel, trebleLevel)
     }
 }
