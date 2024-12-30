@@ -16,7 +16,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <SeekBar
-        android:id="@+id/seekBarBass"
+        android:id="@+id/bassBoostSeekBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -25,21 +25,88 @@
         app:layout_constraintTop_toBottomOf="@id/bassTextView" />
 
     <TextView
-        android:id="@+id/trebleTextView"
+        android:id="@+id/frequency60HzTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Treble: 0"
+        android:text="60 Hz: 0"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/seekBarBass" />
-
+        app:layout_constraintTop_toBottomOf="@id/bassBoostSeekBar" />
     <SeekBar
-        android:id="@+id/seekBarTreble"
+        android:id="@+id/seekBar60Hz"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/trebleTextView" />
+        app:layout_constraintTop_toBottomOf="@id/frequency60HzTextView" />
+
+    <TextView
+        android:id="@+id/frequency230HzTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="230 Hz: 0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/seekBar60Hz" />
+
+
+    <SeekBar
+        android:id="@+id/seekBar230Hz"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/frequency230HzTextView" />
+
+    <TextView
+        android:id="@+id/frequency910HzTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="910 Hz: 0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/seekBar230Hz" />
+    <SeekBar
+        android:id="@+id/seekBar910Hz"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/frequency910HzTextView" />
+
+    <TextView
+        android:id="@+id/frequency3_6kHzTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="910 Hz: 0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/seekBar910Hz" />
+    <SeekBar
+        android:id="@+id/seekBar3_6kHz"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/frequency3_6kHzTextView" />
+    <TextView
+        android:id="@+id/frequency14_0kHzTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="910 Hz: 0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/seekBar3_6kHz" />
+    <SeekBar
+        android:id="@+id/seekBar14_0kHz"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/frequency14_0kHzTextView" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -183,6 +183,6 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
         val bassLevel = sharedPreferences.getInt("Bass", 0)
         val trebleLevel = sharedPreferences.getInt("Treble", 0)
 
-        MusicService.getInstance()?.applyEqualizerSettings(bassLevel, trebleLevel)
+//        MusicService.getInstance()?.applyEqualizerSettings(bassLevel, trebleLevel)
     }
 }

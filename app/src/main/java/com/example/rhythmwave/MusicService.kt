@@ -2,6 +2,8 @@ package com.example.rhythmwave
 
 import android.app.Service
 import android.content.Intent
+import android.media.audiofx.BassBoost
+import android.media.audiofx.Equalizer
 import android.net.Uri
 import android.os.Binder
 import android.os.IBinder
@@ -14,7 +16,6 @@ import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
-import com.google.androidgamesdk.gametextinput.Listener
 
 class MusicService : Service() {
     private lateinit var exoPlayer: ExoPlayer
@@ -22,7 +23,7 @@ class MusicService : Service() {
     private var trackList: List<Track> = emptyList()
     private var currentTrackIndex: Int = 0
     private var trackControlCallback: TrackControlCallback? = null
-    private lateinit var equalizerHelper: EqualizerHelper
+    private lateinit var equalizer: Equalizer
 
     private val binder = MusicServiceBinder()
 
@@ -39,7 +40,8 @@ class MusicService : Service() {
         super.onCreate()
         instance = this
         exoPlayer = SimpleExoPlayer.Builder(this).build()
-        equalizerHelper = EqualizerHelper(getAudioSessionId())
+        equalizer = Equalizer(0, getAudioSessionId())
+        equalizer.enabled = true
 
         (exoPlayer as SimpleExoPlayer).addListener(object : Player.Listener {
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
@@ -58,13 +60,38 @@ class MusicService : Service() {
         return binder
     }
 
-    fun applyEqualizerSettings(bassLevel: Int, trebleLevel: Int) {
-        if (::equalizerHelper.isInitialized) {
-            val bassBand = 0
-            val trebleBand = 1
+    fun applyEqualizerSettings(
+        bassLevel: Int, // Низкие частоты
+        level60Hz: Int,
+        level230Hz: Int,
+        level910Hz: Int,
+        level3_6kHz: Int,
+        level14kHz: Int
+//        isSurround: Boolean // Объемный звук
+    ) {
+        if (::equalizer.isInitialized) {
+            // Устанавливаем уровень для каждого из эквалайзеров
+            equalizer.setBandLevel(0, (level60Hz * 10).toShort()) // 60Hz
+            equalizer.setBandLevel(1, (level230Hz * 10).toShort()) // 230Hz
+            equalizer.setBandLevel(2, (level910Hz * 10).toShort()) // 910Hz
+            equalizer.setBandLevel(3, (level3_6kHz * 10).toShort()) // 3.6kHz
+            equalizer.setBandLevel(4, (level14kHz * 10).toShort()) // 14.0kHz
 
-            equalizerHelper.setBandLevel(bassBand.toShort(), (bassLevel * 10).toShort())
-            equalizerHelper.setBandLevel(trebleBand.toShort(), (trebleLevel * 10).toShort())
+            // Применяем усиление низких частот
+            val bassBoost = BassBoost(0, getAudioSessionId())
+            bassBoost.setEnabled(true)
+            bassBoost.setStrength((bassLevel * 10).toShort()) // Усиление в диапазоне от 0 до 1000
+
+//            // Применяем объемный звук, если требуется
+//            if (isSurround) {
+//                // Логика для активации объемного звука
+//                // Например, включить виртуальный процессор
+//            } else {
+//                // Выключить объемный звук
+//            }
+
+            // Вызываем метод обновления эквалайзера
+            equalizer.setEnabled(true)
         }
     }
 
@@ -158,8 +185,8 @@ class MusicService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         instance = null
-        if (::equalizerHelper.isInitialized) {
-            equalizerHelper.release()
+        if (::equalizer.isInitialized) {
+            equalizer.release()
         }
         exoPlayer.release()
     }
