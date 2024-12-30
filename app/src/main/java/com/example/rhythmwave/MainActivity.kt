@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
     private lateinit var pauseButton: ImageButton
     private lateinit var nextButton: ImageButton
     private lateinit var favoritesCardView: CardView
+    private lateinit var playlistsCardView: CardView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,6 +63,7 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
         pauseButton = findViewById(R.id.pauseButton)
         nextButton = findViewById(R.id.nextButton)
         favoritesCardView = findViewById(R.id.favoritesCardView)
+        playlistsCardView = findViewById(R.id.playlistsCardView)
 
         viewPager.adapter = ViewPagerAdapter(this)
 
@@ -87,15 +89,23 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
         pauseButton.setOnClickListener { MusicService.getInstance()?.togglePlayPause() }
         nextButton.setOnClickListener { MusicService.getInstance()?.nextTrack() }
         favoritesCardView.setOnClickListener { openFavoritesFragment() }
+        playlistsCardView.setOnClickListener { openPlaylistsFragment() }
 
         applyEqualizerSettings()
     }
 
-    private fun openFavoritesFragment() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, FavoritesFragment()).addToBackStack(null).commit()
-        trackControlLayout.visibility = View.GONE
+    private fun openPlaylistsFragment() {
+        replaceFragment(R.id.fragmentContainer, PlaylistFragment())
+    }
 
+    private fun openFavoritesFragment() {
+        replaceFragment(R.id.fragmentContainer, FavoritesFragment())
+    }
+
+    private fun replaceFragment(containerId: Int, fragment: Fragment) {
+        supportFragmentManager.beginTransaction().replace(containerId, fragment)
+            .addToBackStack(null).commit()
+        trackControlLayout.visibility = View.GONE
     }
 
     private class ViewPagerAdapter(fa: AppCompatActivity) : FragmentStateAdapter(fa) {

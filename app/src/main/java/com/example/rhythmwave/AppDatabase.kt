@@ -5,7 +5,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import android.content.Context
 
-@Database(entities = [FavoriteTrack::class], version = 1)
+@Database(entities = [FavoriteTrack::class, Playlist::class, PlaylistTrack::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun favoriteTrackDao(): FavoriteTrackDao
     abstract fun playlistDao(): PlaylistDao
@@ -20,7 +20,7 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "favorites_database"
+                    "app_database"
                 ).build()
                 INSTANCE = instance
                 instance

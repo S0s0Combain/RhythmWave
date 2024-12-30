@@ -8,7 +8,7 @@ import androidx.room.Query
 @Dao
 interface PlaylistDao {
     @Insert
-    suspend fun insert(playlist: Playlist)
+    suspend fun insert(playlist: Playlist):Long
 
     @Query("SELECT * FROM playlists")
     suspend fun getAllPlaylists(): List<Playlist>
