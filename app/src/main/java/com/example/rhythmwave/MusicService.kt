@@ -61,7 +61,7 @@ class MusicService : Service() {
     }
 
     fun applyEqualizerSettings(
-        bassLevel: Int, // Низкие частоты
+        bassLevel: Int,
         level60Hz: Int,
         level230Hz: Int,
         level910Hz: Int,
@@ -70,27 +70,20 @@ class MusicService : Service() {
 //        isSurround: Boolean // Объемный звук
     ) {
         if (::equalizer.isInitialized) {
-            // Устанавливаем уровень для каждого из эквалайзеров
             equalizer.setBandLevel(0, (level60Hz * 10).toShort()) // 60Hz
             equalizer.setBandLevel(1, (level230Hz * 10).toShort()) // 230Hz
             equalizer.setBandLevel(2, (level910Hz * 10).toShort()) // 910Hz
             equalizer.setBandLevel(3, (level3_6kHz * 10).toShort()) // 3.6kHz
             equalizer.setBandLevel(4, (level14kHz * 10).toShort()) // 14.0kHz
 
-            // Применяем усиление низких частот
             val bassBoost = BassBoost(0, getAudioSessionId())
             bassBoost.setEnabled(true)
-            bassBoost.setStrength((bassLevel * 10).toShort()) // Усиление в диапазоне от 0 до 1000
+            bassBoost.setStrength((bassLevel * 10).toShort())
 
-//            // Применяем объемный звук, если требуется
 //            if (isSurround) {
-//                // Логика для активации объемного звука
-//                // Например, включить виртуальный процессор
-//            } else {
-//                // Выключить объемный звук
-//            }
 
-            // Вызываем метод обновления эквалайзера
+//            } else {
+//            }
             equalizer.setEnabled(true)
         }
     }

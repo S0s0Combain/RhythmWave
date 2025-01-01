@@ -39,6 +39,8 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
     private lateinit var nextButton: ImageButton
     private lateinit var favoritesCardView: CardView
     private lateinit var playlistsCardView: CardView
+    private var musicService: MusicService? = null
+    private var isBound = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,6 +94,36 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
         playlistsCardView.setOnClickListener { openPlaylistsFragment() }
 
         applyEqualizerSettings()
+    }
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as MusicService.MusicServiceBinder
+            musicService = binder.getService()
+            isBound = true
+
+            applyEqualizerSettings()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            musicService = null
+            isBound = false
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Intent(this, MusicService::class.java).also { intent ->
+            bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (isBound) {
+            unbindService(serviceConnection)
+            isBound = false
+        }
     }
 
     private fun openPlaylistsFragment() {
@@ -181,8 +213,18 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
     private fun applyEqualizerSettings() {
         val sharedPreferences = getSharedPreferences("EqualizerSettings", MODE_PRIVATE)
         val bassLevel = sharedPreferences.getInt("Bass", 0)
-        val trebleLevel = sharedPreferences.getInt("Treble", 0)
-
-//        MusicService.getInstance()?.applyEqualizerSettings(bassLevel, trebleLevel)
+        val frequency60Hz = sharedPreferences.getInt("60Hz", 0)
+        val frequency230Hz = sharedPreferences.getInt("230Hz", 0)
+        val frequency910Hz = sharedPreferences.getInt("910Hz", 0)
+        val frequency14_0kHz = sharedPreferences.getInt("14.0kHz", 0)
+        val frequency3_6kHz = sharedPreferences.getInt("3.6kHz", 0)
+        musicService?.applyEqualizerSettings(
+            bassLevel,
+            frequency60Hz,
+            frequency230Hz,
+            frequency910Hz,
+            frequency3_6kHz,
+            frequency14_0kHz
+        )
     }
 }

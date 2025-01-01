@@ -60,7 +60,6 @@ class EqualizerActivity : AppCompatActivity() {
         frequency3_6kHzTextView = findViewById(R.id.frequency3_6kHzTextView)
         frequency14_0kHzTextView = findViewById(R.id.frequency14_0kHzTextView)
 
-        // Устанавливаем пределы ползунков
         setSeekBarLimits(seekBarBass)
         setSeekBarLimits(seekBar60Hz)
         setSeekBarLimits(seekBar230Hz)
@@ -70,7 +69,6 @@ class EqualizerActivity : AppCompatActivity() {
 
         loadEqualizerSettings()
 
-        // Установка обработчиков для ползунков
         setupSeekBarListener(seekBarBass, bassTextView, "Bass")
         setupSeekBarListener(seekBar60Hz, frequency60HzTextView, "60Hz")
         setupSeekBarListener(seekBar230Hz, frequency230HzTextView, "230Hz")
@@ -86,8 +84,6 @@ class EqualizerActivity : AppCompatActivity() {
         seekBar910Hz.progress = sharedPreferences.getInt("910Hz", 0)
         seekBar3_6kHz.progress = sharedPreferences.getInt("3.6kHz", 0)
         seekBar14_0kHz.progress = sharedPreferences.getInt("14.0kHz", 0)
-
-        // Обновление текстовых полей
         updateTextViews()
     }
 
@@ -119,18 +115,18 @@ class EqualizerActivity : AppCompatActivity() {
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 textView.text = "$settingKey: $progress"
-                applyEqualizerSettings() // Применение настроек эквалайзера
+                applyEqualizerSettings()
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                saveEqualizerSettings() // Сохранение настроек
+                saveEqualizerSettings()
             }
         })
     }
 
     private fun setSeekBarLimits(seekBar: SeekBar) {
-        seekBar.max = 100 // Установите максимальное значение, если необходимо
+        seekBar.max = 100
     }
 
     private fun updateTextViews() {
