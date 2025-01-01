@@ -213,11 +213,11 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
     private fun applyEqualizerSettings() {
         val sharedPreferences = getSharedPreferences("EqualizerSettings", MODE_PRIVATE)
         val bassLevel = sharedPreferences.getInt("Bass", 0)
-        val frequency60Hz = sharedPreferences.getInt("60Hz", 0)
-        val frequency230Hz = sharedPreferences.getInt("230Hz", 0)
-        val frequency910Hz = sharedPreferences.getInt("910Hz", 0)
-        val frequency14_0kHz = sharedPreferences.getInt("14.0kHz", 0)
-        val frequency3_6kHz = sharedPreferences.getInt("3.6kHz", 0)
+        val frequency60Hz = sharedPreferences.getInt("60Hz", 50)
+        val frequency230Hz = sharedPreferences.getInt("230Hz", 50)
+        val frequency910Hz = sharedPreferences.getInt("910Hz", 50)
+        val frequency14_0kHz = sharedPreferences.getInt("14.0kHz", 50)
+        val frequency3_6kHz = sharedPreferences.getInt("3.6kHz", 50)
         musicService?.applyEqualizerSettings(
             bassLevel,
             frequency60Hz,

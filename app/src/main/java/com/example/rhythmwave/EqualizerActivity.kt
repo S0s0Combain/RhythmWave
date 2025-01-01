@@ -78,12 +78,12 @@ class EqualizerActivity : AppCompatActivity() {
     }
 
     private fun loadEqualizerSettings() {
-        seekBarBass.progress = sharedPreferences.getInt("Bass", 0)
-        seekBar60Hz.progress = sharedPreferences.getInt("60Hz", 0)
-        seekBar230Hz.progress = sharedPreferences.getInt("230Hz", 0)
-        seekBar910Hz.progress = sharedPreferences.getInt("910Hz", 0)
-        seekBar3_6kHz.progress = sharedPreferences.getInt("3.6kHz", 0)
-        seekBar14_0kHz.progress = sharedPreferences.getInt("14.0kHz", 0)
+        seekBarBass.progress = sharedPreferences.getInt("Bass", 50)
+        seekBar60Hz.progress = sharedPreferences.getInt("60Hz", 50)
+        seekBar230Hz.progress = sharedPreferences.getInt("230Hz", 50)
+        seekBar910Hz.progress = sharedPreferences.getInt("910Hz", 50)
+        seekBar3_6kHz.progress = sharedPreferences.getInt("3.6kHz", 50)
+        seekBar14_0kHz.progress = sharedPreferences.getInt("14.0kHz", 50)
         updateTextViews()
     }
 
@@ -127,6 +127,7 @@ class EqualizerActivity : AppCompatActivity() {
 
     private fun setSeekBarLimits(seekBar: SeekBar) {
         seekBar.max = 100
+        seekBar.progress = 50
     }
 
     private fun updateTextViews() {
