@@ -5,11 +5,12 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import android.content.Context
 
-@Database(entities = [FavoriteTrack::class, Playlist::class, PlaylistTrack::class], version = 1)
+@Database(entities = [FavoriteTrack::class, Playlist::class, PlaylistTrack::class, RecentTrack::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun favoriteTrackDao(): FavoriteTrackDao
     abstract fun playlistDao(): PlaylistDao
     abstract fun playlistTrackDao(): PlaylistTrackDao
+    abstract fun recentTrackDao(): RecentTrackDao
 
     companion object {
         @Volatile

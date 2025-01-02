@@ -1,6 +1,7 @@
 package com.example.rhythmwave
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
@@ -16,6 +17,9 @@ import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MusicService : Service() {
     private lateinit var exoPlayer: ExoPlayer
@@ -102,6 +106,15 @@ class MusicService : Service() {
         exoPlayer.prepare()
         exoPlayer.playWhenReady = true
         trackControlCallback?.onTrackChanged(track)
+        CoroutineScope(Dispatchers.IO).launch {
+            val sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000)
+            AppDatabase.getDatabase(applicationContext).recentTrackDao().deleteByTrackId(track.id)
+            AppDatabase.getDatabase(applicationContext).recentTrackDao().insert(
+                RecentTrack(trackId = track.id, timestamp = System.currentTimeMillis())
+            )
+            AppDatabase.getDatabase(applicationContext).recentTrackDao()
+                .deleteOldRecords(sevenDaysAgo)
+        }
         notifyPlaybackStateChanged(true)
     }
 

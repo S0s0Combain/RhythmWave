@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
     private lateinit var nextButton: ImageButton
     private lateinit var favoritesCardView: CardView
     private lateinit var playlistsCardView: CardView
+    private lateinit var recentTracksCardView: CardView
     private var musicService: MusicService? = null
     private var isBound = false
 
@@ -66,6 +67,7 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
         nextButton = findViewById(R.id.nextButton)
         favoritesCardView = findViewById(R.id.favoritesCardView)
         playlistsCardView = findViewById(R.id.playlistsCardView)
+        recentTracksCardView = findViewById(R.id.recentTracksCardView)
 
         viewPager.adapter = ViewPagerAdapter(this)
 
@@ -90,8 +92,9 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
         prevButton.setOnClickListener { MusicService.getInstance()?.previousTrack() }
         pauseButton.setOnClickListener { MusicService.getInstance()?.togglePlayPause() }
         nextButton.setOnClickListener { MusicService.getInstance()?.nextTrack() }
-        favoritesCardView.setOnClickListener { openFavoritesFragment() }
-        playlistsCardView.setOnClickListener { openPlaylistsFragment() }
+        favoritesCardView.setOnClickListener { replaceFragment(R.id.fragmentContainer, FavoritesFragment()) }
+        playlistsCardView.setOnClickListener { replaceFragment(R.id.fragmentContainer, PlaylistFragment()) }
+        recentTracksCardView.setOnClickListener { replaceFragment(R.id.fragmentContainer, RecentTracksFragment()) }
 
         applyEqualizerSettings()
     }
@@ -124,14 +127,6 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
             unbindService(serviceConnection)
             isBound = false
         }
-    }
-
-    private fun openPlaylistsFragment() {
-        replaceFragment(R.id.fragmentContainer, PlaylistFragment())
-    }
-
-    private fun openFavoritesFragment() {
-        replaceFragment(R.id.fragmentContainer, FavoritesFragment())
     }
 
     private fun replaceFragment(containerId: Int, fragment: Fragment) {
