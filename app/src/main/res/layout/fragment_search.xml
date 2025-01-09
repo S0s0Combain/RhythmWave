@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_background"
+    android:background="@color/primary_background"
     tools:context=".SearchFragment">
 
     <EditText
@@ -16,7 +16,7 @@
         android:padding="8dp"
         android:drawableEnd="@drawable/baseline_mic_24"
         android:textColor="@color/light_gray"
-        android:textColorHint="@color/gray"
+        android:textColorHint="@color/light_gray2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -35,7 +35,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Не найдено"
-        android:textColor="@color/gray"
+        android:textColor="@color/light_gray2"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/downloadButton"
         app:layout_constraintEnd_toEndOf="parent"

@@ -17,6 +17,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -52,7 +53,7 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.primary_background)
         val tabLayout: TabLayout = findViewById(R.id.tabLayout)
         val viewPager: ViewPager2 = findViewById(R.id.viewPager)
         searchEditText = findViewById(R.id.searchEditText)

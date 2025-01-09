@@ -12,7 +12,7 @@ import kotlin.random.Random
 
 class EqualizerView(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
     private val paint = Paint().apply {
-        color = ContextCompat.getColor(context, R.color.neon_purple)
+        color = ContextCompat.getColor(context, R.color.accent_color_blue)
         strokeWidth = 10f
     }
 

@@ -28,6 +28,7 @@ class MusicService : Service() {
     private var currentTrackIndex: Int = 0
     private var trackControlCallback: TrackControlCallback? = null
     private lateinit var equalizer: Equalizer
+    private lateinit var trackAdapter: TrackAdapter
 
     private val binder = MusicServiceBinder()
 
@@ -115,7 +116,12 @@ class MusicService : Service() {
             AppDatabase.getDatabase(applicationContext).recentTrackDao()
                 .deleteOldRecords(sevenDaysAgo)
         }
+        trackAdapter.updateCurrentTrack(track)
         notifyPlaybackStateChanged(true)
+    }
+
+    fun setTrackAdapter(trackAdapter: TrackAdapter){
+        this.trackAdapter = trackAdapter
     }
 
     fun pauseTrack() {

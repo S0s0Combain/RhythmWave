@@ -76,10 +76,22 @@ class TrackAdapter(
             holder.titleTextView.setTextColor(
                 ContextCompat.getColor(
                     holder.itemView.context,
-                    R.color.neon_purple
+                    R.color.accent_color_blue
                 )
             )
             holder.equalizerView.visibility = View.VISIBLE
+            holder.replyImageView.setColorFilter(
+                ContextCompat.getColor(
+                    holder.itemView.context,
+                    R.color.accent_color_blue
+                )
+            )
+            holder.contextMenuImageView.setColorFilter(
+                ContextCompat.getColor(
+                    holder.itemView.context,
+                    R.color.accent_color_blue
+                )
+            )
         } else {
             holder.titleTextView.setTextColor(
                 ContextCompat.getColor(
@@ -88,6 +100,18 @@ class TrackAdapter(
                 )
             )
             holder.equalizerView.visibility = View.GONE
+            holder.replyImageView.setColorFilter(
+                ContextCompat.getColor(
+                    holder.itemView.context,
+                    R.color.light_gray2
+                )
+            )
+            holder.contextMenuImageView.setColorFilter(
+                ContextCompat.getColor(
+                    holder.itemView.context,
+                    R.color.light_gray2
+                )
+            )
         }
     }
 
@@ -142,6 +166,7 @@ class TrackAdapter(
         currentTrack = track
         notifyDataSetChanged()
     }
+
 
     class TrackDiffCallback(
         private val oldList: List<Track>,

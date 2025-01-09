@@ -162,6 +162,7 @@ class TrackListFragment : Fragment(), TrackControlCallback {
             onShareClick = { track -> TrackUtils.shareTrack(requireContext(), track, requireContext().contentResolver) },
             onDeleteTrack = { track -> deleteTrack(track) }
         )
+        musicService?.setTrackAdapter(trackAdapter)
         tracksList.layoutManager = LinearLayoutManager(context)
         tracksList.adapter = trackAdapter
         trackAdapter.updateTracks(tracks)
