@@ -3,4 +3,7 @@
     <style name="RoundedImageView">
         <item name="cornerRadius">6dp</item>
     </style>
+    <style name="RoundedPlaylistImage">
+        <item name="cornerRadius">32dp</item>
+    </style>
 </resources>

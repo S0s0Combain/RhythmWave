@@ -27,6 +27,8 @@ class RecentTracksFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_recent_tracks, container, false)
         tracksRecyclerView = view.findViewById(R.id.tracksRecyclerView)
+        val spaceInPixels = resources.getDimensionPixelSize(R.dimen.space_between_items)
+        tracksRecyclerView.addItemDecoration(SpacesItemDecorations(spaceInPixels))
 
         trackAdapter = TrackAdapter(
             onTrackClick = { track ->

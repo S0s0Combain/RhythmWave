@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.database.Cursor
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
@@ -14,7 +13,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -67,7 +65,7 @@ class TrackListFragment : Fragment(), TrackControlCallback {
         super.onViewCreated(view, savedInstanceState)
         tracksList = view.findViewById(R.id.searchRecyclerView)
         val spaceInPixels = resources.getDimensionPixelSize(R.dimen.space_between_items)
-        tracksList.addItemDecoration(SpacesItemDecoration(spaceInPixels))
+        tracksList.addItemDecoration(SpacesItemDecorations(spaceInPixels))
         trackControlLayout = (activity as MainActivity).findViewById(R.id.trackControlLayout)
         trackImage = (activity as MainActivity).findViewById(R.id.trackImage)
         trackTitleTextView = (activity as MainActivity).findViewById(R.id.trackTitleTextView)

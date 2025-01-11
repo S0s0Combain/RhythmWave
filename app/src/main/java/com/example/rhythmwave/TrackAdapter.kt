@@ -131,15 +131,19 @@ class TrackAdapter(
 
                 R.id.menu_add_to_favorites -> {
                     CoroutineScope(Dispatchers.IO).launch {
-                        AppDatabase.getDatabase(view.context).favoriteTrackDao().insert(
-                            FavoriteTrack(
-                                track.id,
-                                track.title,
-                                track.artist,
-                                track.duration,
-                                track.albumArt
-                            )
-                        )
+                        val favoriteTrackDao = AppDatabase.getDatabase(view.context).favoriteTrackDao()
+                        val existingCount = favoriteTrackDao.isTrackFavorite(track.id)
+
+                        if (existingCount > 0) {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(view.context, "Трек уже добавлен в избранные", Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            favoriteTrackDao.insert(FavoriteTrack(track.id, track.title, track.artist, track.duration, track.albumArt))
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(view.context, "Трек добавлен в избранные", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                     }
                     true
                 }

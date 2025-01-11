@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/primary_background">
 
     <TextView
         android:id="@+id/bassTextView"
@@ -11,6 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Bass: 0"
+        android:textColor="@color/light_gray"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -20,6 +22,9 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:progressBackgroundTint="@color/light_gray2"
+        android:progressTint="@color/accent_color_blue"
+        android:thumbTint="@color/accent_color_blue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/bassTextView" />
@@ -29,14 +34,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="60 Hz: 0"
+        android:textColor="@color/light_gray"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/bassBoostSeekBar" />
+
     <SeekBar
         android:id="@+id/seekBar60Hz"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:progressBackgroundTint="@color/light_gray2"
+        android:progressTint="@color/accent_color_blue"
+        android:thumbTint="@color/accent_color_blue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/frequency60HzTextView" />
@@ -46,6 +56,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="230 Hz: 0"
+        android:textColor="@color/light_gray"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/seekBar60Hz" />
@@ -56,6 +67,9 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:progressBackgroundTint="@color/light_gray2"
+        android:progressTint="@color/accent_color_blue"
+        android:thumbTint="@color/accent_color_blue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/frequency230HzTextView" />
@@ -65,14 +79,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="910 Hz: 0"
+        android:textColor="@color/light_gray"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/seekBar230Hz" />
+
     <SeekBar
         android:id="@+id/seekBar910Hz"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:progressBackgroundTint="@color/light_gray2"
+        android:progressTint="@color/accent_color_blue"
+        android:thumbTint="@color/accent_color_blue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/frequency910HzTextView" />
@@ -82,30 +101,41 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="910 Hz: 0"
+        android:textColor="@color/light_gray"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/seekBar910Hz" />
+
     <SeekBar
         android:id="@+id/seekBar3_6kHz"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:progressBackgroundTint="@color/light_gray2"
+        android:progressTint="@color/accent_color_blue"
+        android:thumbTint="@color/accent_color_blue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/frequency3_6kHzTextView" />
+
     <TextView
         android:id="@+id/frequency14_0kHzTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="910 Hz: 0"
+        android:textColor="@color/light_gray"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/seekBar3_6kHz" />
+
     <SeekBar
         android:id="@+id/seekBar14_0kHz"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:progressBackgroundTint="@color/light_gray2"
+        android:progressTint="@color/accent_color_blue"
+        android:thumbTint="@color/accent_color_blue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/frequency14_0kHzTextView" />

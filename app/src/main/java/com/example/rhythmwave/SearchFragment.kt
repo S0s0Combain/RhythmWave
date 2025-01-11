@@ -18,7 +18,6 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -39,7 +38,7 @@ class SearchFragment : Fragment() {
         searchEditText = view.findViewById(R.id.searchEditText)
         searchRecyclerView = view.findViewById(R.id.searchRecyclerView)
         val spaceInPixels = resources.getDimensionPixelSize(R.dimen.space_between_items)
-        searchRecyclerView.addItemDecoration(SpacesItemDecoration(spaceInPixels))
+        searchRecyclerView.addItemDecoration(SpacesItemDecorations(spaceInPixels))
         noResultsTextView = view.findViewById(R.id.noResultsTextView)
         downloadButton = view.findViewById(R.id.downloadButton)
 

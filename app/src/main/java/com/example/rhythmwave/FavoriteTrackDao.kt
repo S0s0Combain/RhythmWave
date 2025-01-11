@@ -15,4 +15,7 @@ interface FavoriteTrackDao {
 
     @Query("SELECT * FROM favorites")
     suspend fun getAllFavorites(): List<FavoriteTrack>
+
+    @Query("SELECT COUNT(*) FROM favorites WHERE id = :trackId")
+    suspend fun isTrackFavorite(trackId: Long): Int
 }

@@ -1,5 +1,6 @@
 package com.example.rhythmwave
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
@@ -39,12 +40,12 @@ class AlbumAdapter(
         fun bind(album: Album) {
             albumName.text = album.name
             albumArtist.text = album.artist
+            var bitmap: Bitmap = BitmapFactory.decodeResource(itemView.context.resources, R.drawable.playlist_deafult)
             if (album.albumArt != null) {
-                val bitmap = BitmapFactory.decodeByteArray(album.albumArt, 0, album.albumArt.size)
-                albumImage.setImageBitmap(bitmap)
-            } else {
-                //albumImage.setImageResource(R.drawable.default_album_art)
+                bitmap = BitmapFactory.decodeByteArray(album.albumArt, 0, album.albumArt.size)
             }
+            val roundedBitmap = ImageUtils.roundCorner(bitmap, 40f)
+            albumImage.setImageBitmap(roundedBitmap)
             itemView.setOnClickListener { onAlbumClick(album) }
         }
     }

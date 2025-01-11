@@ -8,7 +8,9 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.Toast
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -21,7 +23,7 @@ class PlaylistFragment : Fragment() {
     private lateinit var playlistRecyclerView: RecyclerView
     private val playlists = mutableListOf<Playlist>()
     private lateinit var playlistAdapter: PlaylistAdapter
-    private lateinit var createPlaylistButton: Button
+    private lateinit var createPlaylistButton: ImageButton
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,10 +34,10 @@ class PlaylistFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        createPlaylistButton = view.findViewById(R.id.createPlaylistButton)
+        createPlaylistButton = view.findViewById(R.id.addPlaylistImageButton)
         createPlaylistButton.setOnClickListener { createNewPlaylist() }
         playlistRecyclerView = view.findViewById(R.id.playlistRecyclerView)
-        playlistRecyclerView.layoutManager = LinearLayoutManager(context)
+        playlistRecyclerView.layoutManager = GridLayoutManager(context, 2)
         playlistAdapter = PlaylistAdapter(playlists, this::onPlaylistClick)
         playlistRecyclerView.adapter = playlistAdapter
         loadPlaylists()

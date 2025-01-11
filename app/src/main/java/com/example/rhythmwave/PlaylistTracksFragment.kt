@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
@@ -12,6 +13,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,6 +30,7 @@ class PlaylistTracksFragment : Fragment() {
     private var isBound = false
     private lateinit var trackAdapter: PlaylistTracksAdapter
     private var playlistId: Long? = null
+    private lateinit var playlistImage: ImageView
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -64,6 +67,7 @@ class PlaylistTracksFragment : Fragment() {
         tracksList = view.findViewById(R.id.playlistTracksRecyclerView)
         tracksList.layoutManager = LinearLayoutManager(context)
 
+        playlistImage = view.findViewById(R.id.playlistImage)
         trackAdapter = PlaylistTracksAdapter()
         tracksList.adapter = trackAdapter
     }
