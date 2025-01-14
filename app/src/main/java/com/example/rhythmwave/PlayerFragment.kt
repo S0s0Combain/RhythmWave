@@ -52,7 +52,6 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         val view = inflater.inflate(R.layout.fragment_player, container, false)
         visualizationView = view.findViewById(R.id.visualizationView)
 
-        // Initialize Horizon
         horizon = Horizon(
             visualizationView,
             resources.getColor(R.color.primary_background),
@@ -61,7 +60,6 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
             16
         )
 
-        // Initialize Visualizer
         visualizer = Visualizer(musicService?.getAudioSessionId() ?: 0)
         visualizer.captureSize = Visualizer.getCaptureSizeRange()[1]
         visualizer.setDataCaptureListener(object : Visualizer.OnDataCaptureListener {
@@ -86,41 +84,17 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         return view
     }
 
-//    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-//        super.onViewCreated(view, savedInstanceState)
-//        //Log.d("MyLog", (musicService == null).toString())
-//        val currentTrack = musicService?.getCurrentTrack()
-//        if (currentTrack != null) {
-//            updateTrackInfo(currentTrack)
-//            updateSeekbar(musicService?.getCurrentPosition() ?: 0, currentTrack.duration)
-//        }
-//        // Initialize Visualizer here
-//        musicService?.let {
-//            visualizer = Visualizer(it.getAudioSessionId()).apply {
-//                captureSize = 512
-//                scalingMode = Visualizer.SCALING_MODE_NORMALIZED
-//                measurementMode = Visualizer.MEASUREMENT_MODE_NONE
-//                setDataCaptureListener(object : Visualizer.OnDataCaptureListener {
-//                    override fun onWaveFormDataCapture(
-//                        visualizer: Visualizer?,
-//                        waveform: ByteArray?,
-//                        samplingRate: Int
-//                    ) {
-//                        horizon.updateView(waveform)
-//                    }
-//
-//                    override fun onFftDataCapture(
-//                        visualizer: Visualizer?,
-//                        fft: ByteArray?,
-//                        samplingRate: Int
-//                    ) {
-////                        fft?.let { visualizationView.updateVisualizer(it) }
-//                    }
-//                }, Visualizer.getMaxCaptureRate() / 2, true, true)
-//                enabled = true
-//            }
-//        }
-//    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val currentTrack = musicService?.getCurrentTrack()
+        if (currentTrack != null) {
+            updateTrackInfo(currentTrack)
+            updateSeekbar(musicService?.getCurrentPosition() ?: 0, currentTrack.duration)
+        }
+
+        buttonDown = view.findViewById(R.id.buttonDown)
+        buttonDown.setOnClickListener { collapseFragment() }
+    }
 
     override fun onResume() {
         super.onResume()
@@ -133,19 +107,26 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     }
 
     fun collapseFragment() {
-        val fragmentContainer = requireActivity().findViewById<FrameLayout>(R.id.fragmentContainer)
         val animation = AnimationUtils.loadAnimation(context, R.anim.fade_out)
+
         animation.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(animation: Animation?) {}
+            override fun onAnimationStart(animation: Animation?) {
+                view?.visibility = View.VISIBLE
+                (activity as MainActivity).showTrackControl(musicService?.getCurrentTrack()!!)
+            }
 
             override fun onAnimationEnd(animation: Animation?) {
                 requireActivity().supportFragmentManager.popBackStack()
+                view?.visibility = View.GONE
             }
 
             override fun onAnimationRepeat(animation: Animation?) {}
         })
-        fragmentContainer.startAnimation(animation)
+
+        view?.startAnimation(animation)
     }
+
+
 
     override fun onDown(e: MotionEvent): Boolean {
         return true

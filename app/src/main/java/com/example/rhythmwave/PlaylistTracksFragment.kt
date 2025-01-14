@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 
-class PlaylistTracksFragment : Fragment() {
+class PlaylistTracksFragment : Fragment(), TrackControlCallback {
 
     private lateinit var tracksList: RecyclerView
     private var musicService: MusicService? = null
@@ -31,6 +31,7 @@ class PlaylistTracksFragment : Fragment() {
     private lateinit var trackAdapter: PlaylistTracksAdapter
     private var playlistId: Long? = null
     private lateinit var playlistImage: ImageView
+    private lateinit var tracks: MutableList<Track>
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -68,7 +69,9 @@ class PlaylistTracksFragment : Fragment() {
         tracksList.layoutManager = LinearLayoutManager(context)
 
         playlistImage = view.findViewById(R.id.playlistImage)
-        trackAdapter = PlaylistTracksAdapter()
+        trackAdapter = PlaylistTracksAdapter(){track ->
+            onTrackClick(track)
+        }
         tracksList.adapter = trackAdapter
     }
 
@@ -80,12 +83,20 @@ class PlaylistTracksFragment : Fragment() {
         }
     }
 
+    private fun onTrackClick(track: Track){
+        val currentTrackList = musicService?.getTrackList() ?: return
+        if(currentTrackList!=tracks){
+            musicService?.setTrackList(tracks)
+        }
+        musicService?.playTrack(track)
+    }
+
     private fun loadTracks() {
         playlistId?.let { id ->
             CoroutineScope(Dispatchers.IO).launch {
                 val playlistTracks = AppDatabase.getDatabase(requireContext()).playlistTrackDao().getTracksInPlaylist(id)
 
-                val tracks = mutableListOf<Track>()
+                tracks = mutableListOf()
                 val trackIds = mutableListOf<Long>()
 
                 for (playlistTrack in playlistTracks) {
@@ -161,5 +172,13 @@ class PlaylistTracksFragment : Fragment() {
                 null
             }
         }
+    }
+
+    override fun onTrackChanged(track: Track) {
+        (activity as MainActivity).showTrackControl(track)
+    }
+
+    override fun onPlaybackStateChanged(isPlaying: Boolean) {
+        TODO("Not yet implemented")
     }
 }

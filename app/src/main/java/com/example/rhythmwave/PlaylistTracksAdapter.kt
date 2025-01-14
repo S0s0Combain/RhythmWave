@@ -8,7 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class PlaylistTracksAdapter : RecyclerView.Adapter<PlaylistTracksAdapter.PlaylistTracksViewHolder>() {
+class PlaylistTracksAdapter(private val onTrackClick :(Track) -> Unit) : RecyclerView.Adapter<PlaylistTracksAdapter.PlaylistTracksViewHolder>() {
 
     private var tracks: List<Track> = emptyList()
 
@@ -44,6 +44,8 @@ class PlaylistTracksAdapter : RecyclerView.Adapter<PlaylistTracksAdapter.Playlis
             } else {
 
             }
+
+            itemView.setOnClickListener { onTrackClick(track) }
         }
     }
 }

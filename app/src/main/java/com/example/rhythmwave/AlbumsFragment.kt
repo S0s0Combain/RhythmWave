@@ -41,6 +41,7 @@ class AlbumsFragment : Fragment() {
                     .commit()
             }
         )
+
         albumsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         albumsRecyclerView.adapter = albumAdapter
 

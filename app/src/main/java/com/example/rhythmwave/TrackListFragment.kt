@@ -34,6 +34,7 @@ class TrackListFragment : Fragment(), TrackControlCallback {
     private lateinit var pauseButton: ImageButton
     private lateinit var nextButton: ImageButton
     private lateinit var fragmentContainer: FrameLayout
+    private lateinit var tracks: MutableList<Track>
 
     var musicService: MusicService? = null
     private var isBound = false
@@ -111,7 +112,7 @@ class TrackListFragment : Fragment(), TrackControlCallback {
             null
         )
 
-        val tracks = mutableListOf<Track>()
+        tracks = mutableListOf()
         cursor?.use {
             if (it.moveToFirst()) {
                 do {
@@ -145,19 +146,15 @@ class TrackListFragment : Fragment(), TrackControlCallback {
 
         trackAdapter = TrackAdapter(
             onTrackClick = { track ->
-                if (musicService?.getCurrentTrack() == track) {
-                    if (musicService?.isPlaying() == true) {
-                        musicService?.pauseTrack()
-                    } else {
-                        musicService?.resumeTrack()
-                        openPlayerFragment(musicService)
-                    }
-                } else {
-                    musicService?.playTrack(track)
-                    openPlayerFragment(musicService)
-                }
+                onTrackClick(track)
             },
-            onShareClick = { track -> TrackUtils.shareTrack(requireContext(), track, requireContext().contentResolver) },
+            onShareClick = { track ->
+                TrackUtils.shareTrack(
+                    requireContext(),
+                    track,
+                    requireContext().contentResolver
+                )
+            },
             onDeleteTrack = { track -> deleteTrack(track) }
         )
         musicService?.setTrackAdapter(trackAdapter)
@@ -195,6 +192,24 @@ class TrackListFragment : Fragment(), TrackControlCallback {
         return null
     }
 
+    private fun onTrackClick(track: Track) {
+        val currentTrackList = musicService?.getTrackList() ?: return
+        if (currentTrackList != tracks) {
+            musicService?.setTrackList(tracks)
+        }
+        if (musicService?.getCurrentTrack() == track) {
+            if (musicService?.isPlaying() == true) {
+                musicService?.pauseTrack()
+            } else {
+                musicService?.resumeTrack()
+                openPlayerFragment(musicService)
+            }
+        } else {
+            musicService?.playTrack(track)
+            openPlayerFragment(musicService)
+        }
+    }
+
     override fun onTrackChanged(track: Track) {
         (activity as MainActivity).showTrackControl(track)
     }
@@ -223,7 +238,8 @@ class TrackListFragment : Fragment(), TrackControlCallback {
             selectionArgs
         )
 
-        val updatedTrackList = musicService?.getTrackList()?.filter { it.id != track.id } ?: emptyList()
+        val updatedTrackList =
+            musicService?.getTrackList()?.filter { it.id != track.id } ?: emptyList()
         musicService?.setTrackList(updatedTrackList)
         trackAdapter.updateTracks(updatedTrackList)
     }

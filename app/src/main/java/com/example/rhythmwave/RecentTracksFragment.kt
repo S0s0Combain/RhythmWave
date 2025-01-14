@@ -1,8 +1,12 @@
 package com.example.rhythmwave
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.net.Uri
 import android.os.Bundle
+import android.os.IBinder
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
@@ -20,6 +24,22 @@ class RecentTracksFragment : Fragment() {
 
     private lateinit var tracksRecyclerView: RecyclerView
     private lateinit var trackAdapter: TrackAdapter
+    private lateinit var tracks: MutableList<Track>
+    var musicService: MusicService? = null
+    private var isBound = false
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            musicService = (service as MusicService.MusicServiceBinder).getService()
+            isBound = true
+            loadRecentTracks()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            isBound = false
+        }
+
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,9 +52,7 @@ class RecentTracksFragment : Fragment() {
 
         trackAdapter = TrackAdapter(
             onTrackClick = { track ->
-                MusicService.getInstance()?.playTrack(track)
-                (requireActivity() as MainActivity).showTrackControl(track)
-                openPlayerFragment()
+                onTrackClick(track)
             },
             onShareClick = { track -> TrackUtils.shareTrack(requireContext(), track, requireContext().contentResolver) },
             onDeleteTrack = { track -> deleteTrack(track) }
@@ -42,10 +60,23 @@ class RecentTracksFragment : Fragment() {
 
         tracksRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         tracksRecyclerView.adapter = trackAdapter
-
-        loadRecentTracks()
+        context?.bindService(
+            Intent(context, MusicService::class.java),
+            serviceConnection,
+            Context.BIND_AUTO_CREATE
+        )
 
         return view
+    }
+
+    private fun onTrackClick(track: Track){
+        val currentTrackList = musicService?.getTrackList() ?: return
+        if(currentTrackList!=tracks){
+            musicService?.setTrackList(tracks)
+        }
+        MusicService.getInstance()?.playTrack(track)
+        (requireActivity() as MainActivity).showTrackControl(track)
+        openPlayerFragment()
     }
 
     private fun loadRecentTracks() {
@@ -54,7 +85,7 @@ class RecentTracksFragment : Fragment() {
 
             val recentTracks = AppDatabase.getDatabase(requireContext()).recentTrackDao().getRecentTracks(sevenDaysAgo)
 
-            val tracks = mutableListOf<Track>()
+            tracks = mutableListOf()
 
             for (recentTrack in recentTracks) {
                 val track = getTrackById(recentTrack.trackId)

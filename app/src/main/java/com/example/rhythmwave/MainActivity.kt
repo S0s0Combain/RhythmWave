@@ -26,7 +26,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
-class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
+class MainActivity : AppCompatActivity(), TrackControlCallback {
 
     private lateinit var searchEditText: EditText
     private lateinit var fragmentContainer: FrameLayout
@@ -190,21 +190,20 @@ class MainActivity : AppCompatActivity(), IOnBackPressed, TrackControlCallback {
     }
 
     override fun onBackPressed() {
-        if (!backPressed()) {
+        val fragmentManager = supportFragmentManager
+        val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
+
+        if (fragmentManager.backStackEntryCount > 0) {
+            if (currentFragment is PlayerFragment) {
+                currentFragment.collapseFragment()
+            } else {
+                fragmentManager.popBackStack()
+            }
+        } else {
             super.onBackPressed()
         }
     }
 
-    override fun backPressed(): Boolean {
-        val fragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer)
-        return if (fragment is PlayerFragment) {
-            fragment.collapseFragment()
-            trackControlLayout.visibility = View.VISIBLE
-            true
-        } else {
-            false
-        }
-    }
 
     private fun applyEqualizerSettings() {
         val sharedPreferences = getSharedPreferences("EqualizerSettings", MODE_PRIVATE)

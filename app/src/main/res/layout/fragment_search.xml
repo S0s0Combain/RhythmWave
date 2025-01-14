@@ -49,6 +49,7 @@
         android:layout_margin="16dp"
         android:backgroundTint="@color/accent_color_blue"
         android:visibility="gone"
+        android:text="Скачать через Google"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

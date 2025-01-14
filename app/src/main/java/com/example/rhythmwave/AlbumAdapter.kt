@@ -5,9 +5,14 @@ import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AlbumAdapter(
     private val onAlbumClick: (Album) -> Unit
@@ -40,12 +45,19 @@ class AlbumAdapter(
         fun bind(album: Album) {
             albumName.text = album.name
             albumArtist.text = album.artist
-            var bitmap: Bitmap = BitmapFactory.decodeResource(itemView.context.resources, R.drawable.playlist_deafult)
+
             if (album.albumArt != null) {
-                bitmap = BitmapFactory.decodeByteArray(album.albumArt, 0, album.albumArt.size)
+                CoroutineScope(Dispatchers.IO).launch {
+                    val bitmap = BitmapFactory.decodeByteArray(album.albumArt, 0, album.albumArt.size)
+                    val roundedBitmap = ImageUtils.roundCorner(bitmap, 40f)
+                    withContext(Dispatchers.Main) {
+                        albumImage.setImageBitmap(roundedBitmap)
+                    }
+                }
+            } else {
+                albumImage.setImageResource(R.drawable.playlist_deafult)
             }
-            val roundedBitmap = ImageUtils.roundCorner(bitmap, 40f)
-            albumImage.setImageBitmap(roundedBitmap)
+
             itemView.setOnClickListener { onAlbumClick(album) }
         }
     }

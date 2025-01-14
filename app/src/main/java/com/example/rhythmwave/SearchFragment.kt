@@ -43,7 +43,6 @@ class SearchFragment : Fragment() {
         downloadButton = view.findViewById(R.id.downloadButton)
 
         searchAdapter = TrackAdapter(onTrackClick = { track ->
-            // Handle track click
         }, onShareClick = { track ->
 
         }, onDeleteTrack = {})

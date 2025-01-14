@@ -1,9 +1,13 @@
 package com.example.rhythmwave
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
+import android.os.IBinder
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
@@ -21,6 +25,23 @@ class TracksFragment : Fragment(), TrackControlCallback {
     private lateinit var trackControlLayout: ConstraintLayout
     private var album: Album? = null
     private var artist: Artist? = null
+    private lateinit var tracks: MutableList<Track>
+
+    var musicService: MusicService? = null
+    private var isBound = false
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            musicService = (service as MusicService.MusicServiceBinder).getService()
+            isBound = true
+            loadTracks()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            isBound = false
+        }
+
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,19 +56,36 @@ class TracksFragment : Fragment(), TrackControlCallback {
 
         trackAdapter = TrackAdapter(
             onTrackClick = { track ->
-                MusicService.getInstance()?.playTrack(track)
-                (requireActivity() as MainActivity).showTrackControl(track)
-                openPlayerFragment(MusicService.getInstance())
+                onTrackClick(track)
             },
-            onShareClick = { track -> TrackUtils.shareTrack(requireContext(), track, requireContext().contentResolver) },
+            onShareClick = { track ->
+                TrackUtils.shareTrack(
+                    requireContext(),
+                    track,
+                    requireContext().contentResolver
+                )
+            },
             onDeleteTrack = { track -> deleteTrack(track) }
         )
         tracksRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         tracksRecyclerView.adapter = trackAdapter
-
-        loadTracks()
+        context?.bindService(
+            Intent(context, MusicService::class.java),
+            serviceConnection,
+            Context.BIND_AUTO_CREATE
+        )
 
         return view
+    }
+
+    private fun onTrackClick(track: Track) {
+        val currentTrackList = musicService?.getTrackList() ?: return
+        if (currentTrackList != tracks) {
+            musicService?.setTrackList(tracks)
+        }
+        MusicService.getInstance()?.playTrack(track)
+        (requireActivity() as MainActivity).showTrackControl(track)
+        openPlayerFragment(MusicService.getInstance())
     }
 
     private fun loadTracks() {
@@ -75,21 +113,26 @@ class TracksFragment : Fragment(), TrackControlCallback {
             null
         )
 
-        val tracks = mutableListOf<Track>()
+        tracks = mutableListOf<Track>()
         cursor?.use {
             if (it.moveToFirst()) {
                 do {
                     val title = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE))
-                    val artist = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST))
-                    val duration = it.getInt(it.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION))
+                    val artist =
+                        it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST))
+                    val duration =
+                        it.getInt(it.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION))
                     val id = it.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
-                    val mimeType = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE))
+                    val mimeType =
+                        it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE))
 
                     if (duration < 30000 || mimeType != "audio/mpeg") {
                         continue
                     }
 
-                    val albumArt = getAlbumArt(requireContext(), album?.albumId ?: 0)
+                    // Получаем изображение альбома из идентификатора трека
+                    val albumArt = getAlbumArt(requireContext(), id)
+
                     tracks.add(Track(title, artist, duration, id, albumArt))
                 } while (it.moveToNext())
             }
@@ -98,16 +141,33 @@ class TracksFragment : Fragment(), TrackControlCallback {
         trackAdapter.updateTracks(tracks)
     }
 
-    private fun getAlbumArt(context: Context, albumId: Long): ByteArray? {
-        val uri: Uri = Uri.parse("content://media/external/audio/albumart/$albumId")
-        return try {
-            val inputStream = context.contentResolver.openInputStream(uri)
-            val byteArrayOutputStream = ByteArrayOutputStream()
-            inputStream?.copyTo(byteArrayOutputStream)
-            byteArrayOutputStream.toByteArray()
-        } catch (e: Exception) {
-            null
+    private fun getAlbumArt(context: Context, trackId: Long): ByteArray? {
+        val uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        val selection = "${MediaStore.Audio.Media._ID} = ?"
+        val selectionArgs = arrayOf(trackId.toString())
+        val projection = arrayOf(MediaStore.Audio.Media.ALBUM_ID)
+
+        var albumId: Long? = null
+        context.contentResolver.query(uri, projection, selection, selectionArgs, null)
+            ?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    albumId =
+                        cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
+                }
+            }
+
+        if (albumId != null) {
+            val albumArtUri: Uri = Uri.parse("content://media/external/audio/albumart/$albumId")
+            return try {
+                val inputStream = context.contentResolver.openInputStream(albumArtUri)
+                val byteArrayOutputStream = ByteArrayOutputStream()
+                inputStream?.copyTo(byteArrayOutputStream)
+                byteArrayOutputStream.toByteArray()
+            } catch (e: Exception) {
+                null
+            }
         }
+        return null
     }
 
     private fun openPlayerFragment(musicService: MusicService?) {
@@ -116,8 +176,7 @@ class TracksFragment : Fragment(), TrackControlCallback {
             this.musicService = musicService
         }
         requireActivity().supportFragmentManager.beginTransaction()
-            .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
-            .replace(R.id.fragmentContainer, playerFragment)
+            .add(R.id.fragmentContainer, playerFragment)
             .addToBackStack(null)
             .commit()
     }
