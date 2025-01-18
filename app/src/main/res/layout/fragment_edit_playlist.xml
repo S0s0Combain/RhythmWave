@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primary_background"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:src="@drawable/ic_back"
+            app:tint="@color/light_gray" />
+
+        <TextView
+            android:id="@+id/titleTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Изменение плейлиста"
+            android:textColor="@color/light_gray"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp">
+
+        <ImageView
+            android:id="@+id/playlistImageView"
+            android:layout_width="240dp"
+            android:layout_height="240dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/playlist_deafult" />
+
+        <ImageButton
+            android:id="@+id/selectImageButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="bottom|right"
+            android:background="@null"
+            android:paddingEnd="8dp"
+            android:paddingBottom="8dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_camera"
+            android:text="Выбрать изображение"
+            app:tint="@color/light_gray" />
+    </FrameLayout>
+
+    <EditText
+        android:id="@+id/editPlaylistName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="@color/light_gray"
+        android:hint="Введите название плейлиста"
+        android:textColor="@color/light_gray"
+        android:textColorHint="@color/light_gray" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="@color/accent_color_blue"
+        android:text="Сохранить" />
+</LinearLayout>

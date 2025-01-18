@@ -36,6 +36,7 @@
             android:clickable="true"
             android:focusable="false"
             android:hint="@string/search"
+            android:backgroundTint="@color/light_gray"
             android:textColor="@color/light_gray"
             android:textColorHint="@color/light_gray" />
     </LinearLayout>
@@ -231,7 +232,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/pauseButton"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/secondary_background" />
+            app:tint="@color/primary_background" />
 
         <ImageButton
             android:id="@+id/pauseButton"
@@ -244,7 +245,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/nextButton"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/secondary_background" />
+            app:tint="@color/primary_background" />
 
         <ImageButton
             android:id="@+id/nextButton"
@@ -256,6 +257,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/secondary_background" />
+            app:tint="@color/primary_background" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

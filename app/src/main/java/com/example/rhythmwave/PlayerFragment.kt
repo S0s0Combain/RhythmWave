@@ -16,6 +16,7 @@ import android.view.animation.AnimationUtils
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.SeekBar
+import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
@@ -39,8 +40,8 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     private val updateSeekBarRunnable = object : Runnable {
         override fun run() {
             val currentPosition = musicService?.getCurrentPosition() ?: 0
-//            fragmentSeekBar.progress = currentPosition
-//            handler.postDelayed(this, 1000)
+            fragmentSeekBar.progress = currentPosition
+            handler.postDelayed(this, 1000)
         }
     }
 
@@ -50,6 +51,50 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_player, container, false)
+        buttonDown = view.findViewById(R.id.buttonDown)
+        titleTextView = view.findViewById(R.id.titleTextView)
+        artistTextView = view.findViewById(R.id.artistTextView)
+        prevButton = view.findViewById(R.id.prevButton)
+        pauseButton = view.findViewById(R.id.pauseButton)
+        nextButton = view.findViewById(R.id.nextButton)
+        fragmentSeekBar = view.findViewById(R.id.fragmentSeekBar)
+        visualizationView = view.findViewById(R.id.visualizationView)
+        trackControlLayout = (activity as MainActivity).findViewById(R.id.trackControlLayout)
+
+        buttonDown.setOnClickListener { collapseFragment() }
+        prevButton.setOnClickListener { musicService?.previousTrack() }
+        pauseButton.setOnClickListener { musicService?.togglePlayPause() }
+        nextButton.setOnClickListener { musicService?.nextTrack() }
+        fragmentSeekBar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    musicService?.seekTo(progress)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
+        gestureDetector = GestureDetector(context, this)
+        view.setOnTouchListener { _, event ->
+            gestureDetector.onTouchEvent(event)
+            true
+        }
+        buttonDown = view.findViewById(R.id.buttonDown)
+        buttonDown.setOnClickListener { collapseFragment() }
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val currentTrack = musicService?.getCurrentTrack()
+        if (currentTrack != null) {
+            updateTrackInfo(currentTrack)
+            updateSeekbar(musicService?.getCurrentPosition() ?: 0, currentTrack.duration)
+        }
+
         visualizationView = view.findViewById(R.id.visualizationView)
 
         horizon = Horizon(
@@ -80,20 +125,6 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
             }
         }, Visualizer.getMaxCaptureRate(), true, true)
         visualizer.enabled = true
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        val currentTrack = musicService?.getCurrentTrack()
-        if (currentTrack != null) {
-            updateTrackInfo(currentTrack)
-            updateSeekbar(musicService?.getCurrentPosition() ?: 0, currentTrack.duration)
-        }
-
-        buttonDown = view.findViewById(R.id.buttonDown)
-        buttonDown.setOnClickListener { collapseFragment() }
     }
 
     override fun onResume() {
@@ -166,13 +197,13 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     }
 
     fun updateTrackInfo(track: Track) {
-//        titleTextView.text = track.title
-//        artistTextView.text = track.artist
+        titleTextView.text = track.title
+        artistTextView.text = track.artist
     }
 
     fun updateSeekbar(position: Int, duration: Int) {
-//        fragmentSeekBar.max = duration
-//        fragmentSeekBar.progress = position
+        fragmentSeekBar.max = duration
+        fragmentSeekBar.progress = position
     }
 
     override fun onDestroy() {

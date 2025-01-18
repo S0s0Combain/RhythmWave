@@ -13,7 +13,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.PopupMenu
+import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,6 +36,7 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
     private var playlistId: Long? = null
     private lateinit var playlistImage: ImageView
     private lateinit var tracks: MutableList<Track>
+    private lateinit var editPlaylistButton: ImageButton
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -67,12 +72,19 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
         super.onViewCreated(view, savedInstanceState)
         tracksList = view.findViewById(R.id.playlistTracksRecyclerView)
         tracksList.layoutManager = LinearLayoutManager(context)
+        val spaceInPixels = resources.getDimensionPixelSize(R.dimen.space_between_items)
+        tracksList.addItemDecoration(SpacesItemDecorations(spaceInPixels))
+
+        editPlaylistButton = view.findViewById(R.id.editPlaylistButton)
+        editPlaylistButton.setOnClickListener { showContextMenu(it) }
 
         playlistImage = view.findViewById(R.id.playlistImage)
-        trackAdapter = PlaylistTracksAdapter(){track ->
+        trackAdapter = PlaylistTracksAdapter { track ->
             onTrackClick(track)
         }
         tracksList.adapter = trackAdapter
+
+        tracks = mutableListOf()
     }
 
     override fun onDestroy() {
@@ -83,9 +95,9 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
         }
     }
 
-    private fun onTrackClick(track: Track){
+    private fun onTrackClick(track: Track) {
         val currentTrackList = musicService?.getTrackList() ?: return
-        if(currentTrackList!=tracks){
+        if (currentTrackList != tracks) {
             musicService?.setTrackList(tracks)
         }
         musicService?.playTrack(track)
@@ -94,23 +106,42 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
     private fun loadTracks() {
         playlistId?.let { id ->
             CoroutineScope(Dispatchers.IO).launch {
-                val playlistTracks = AppDatabase.getDatabase(requireContext()).playlistTrackDao().getTracksInPlaylist(id)
+                val playlistTracks = AppDatabase.getDatabase(requireContext()).playlistTrackDao()
+                    .getTracksInPlaylist(id)
 
-                tracks = mutableListOf()
+                val playlist =
+                    AppDatabase.getDatabase(requireContext()).playlistDao().getPlaylistById(id)
+
+                val newTracks = mutableListOf<Track>()
                 val trackIds = mutableListOf<Long>()
 
                 for (playlistTrack in playlistTracks) {
                     val track = getTrackById(playlistTrack.trackId)
                     if (track != null) {
-                        tracks.add(track)
+                        newTracks.add(track)
                         trackIds.add(playlistTrack.trackId)
                     } else {
-                        AppDatabase.getDatabase(requireContext()).playlistTrackDao().removeTrackFromPlaylist(id, playlistTrack.trackId)
+                        AppDatabase.getDatabase(requireContext()).playlistTrackDao()
+                            .removeTrackFromPlaylist(id, playlistTrack.trackId)
                     }
                 }
 
                 withContext(Dispatchers.Main) {
+                    tracks.clear()
+                    tracks.addAll(newTracks)
                     trackAdapter.updateTracks(tracks)
+                    view?.findViewById<TextView>(R.id.playlistNameTextView)?.text = playlist?.name
+                    if (playlist?.image == null) {
+                        playlistImage.setImageResource(R.drawable.playlist_deafult)
+                    } else {
+                        playlistImage.setImageBitmap(playlist?.image?.let {
+                            BitmapFactory.decodeByteArray(
+                                it,
+                                0,
+                                it.size
+                            )
+                        })
+                    }
                 }
             }
         }
@@ -180,5 +211,55 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
 
     override fun onPlaybackStateChanged(isPlaying: Boolean) {
         TODO("Not yet implemented")
+    }
+
+    private fun showContextMenu(view: View) {
+        val popupMenu = PopupMenu(context, view)
+        popupMenu.menuInflater.inflate(R.menu.playlist_menu, popupMenu.menu)
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.menu_edit_playlist -> {
+                    openEditPlaylistFragment()
+                    true
+                }
+
+                R.id.menu_delete -> {
+                    deletePlaylist()
+                    true
+                }
+
+                else -> false
+            }
+        }
+        popupMenu.show()
+    }
+
+    private fun openEditPlaylistFragment() {
+        val fragment = EditPlaylistFragment().apply {
+            arguments = Bundle().apply {
+                putLong("playlistId", playlistId!!)
+            }
+        }
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    private fun deletePlaylist() {
+        playlistId?.let {
+            CoroutineScope(Dispatchers.IO).launch {
+                AppDatabase.getDatabase(requireContext()).playlistDao().deletePlaylistById(it)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "Плейлист удалён", Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.popBackStack()
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadTracks()
     }
 }

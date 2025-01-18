@@ -30,8 +30,8 @@ class PlaylistTracksAdapter(private val onTrackClick :(Track) -> Unit) : Recycle
     override fun getItemCount(): Int = tracks.size
 
     inner class PlaylistTracksViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val trackTitle: TextView = itemView.findViewById(R.id.trackTitle)
-        private val trackArtist: TextView = itemView.findViewById(R.id.trackArtist)
+        private val trackTitle: TextView = itemView.findViewById(R.id.titleTextView)
+        private val trackArtist: TextView = itemView.findViewById(R.id.artistTextView)
         val trackImageView = itemView.findViewById<ImageView>(R.id.trackImage)
 
         fun bind(track: Track) {

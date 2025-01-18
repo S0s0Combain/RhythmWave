@@ -1,22 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="8dp">
 
-    <ImageView
-        android:id="@+id/playlistImageView"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/playlist_deafult" />
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/playlistImageView"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:background="@drawable/rounded_image_view"
+            android:clipToOutline="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/playlist_deafult" />
+
+        <ImageButton
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="right|bottom"
+            android:background="@null"
+            android:paddingEnd="4dp"
+            android:paddingBottom="4dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_play"
+            app:tint="@color/light_gray" />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/playlistNameTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="@color/white"
-        android:layout_marginTop="4dp" />
+        android:padding="4dp"
+        android:textColor="@color/light_gray"
+        android:textSize="16sp" />
 </LinearLayout>

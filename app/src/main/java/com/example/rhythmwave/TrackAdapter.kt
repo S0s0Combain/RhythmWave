@@ -59,8 +59,6 @@ class TrackAdapter(
             val bitmap = BitmapFactory.decodeByteArray(track.albumArt, 0, track.albumArt.size)
             val roundedBitmap = ImageUtils.roundCorner(bitmap, 40f)
             holder.trackImageView.setImageBitmap(roundedBitmap)
-        } else {
-
         }
 
         holder.itemView.setOnClickListener { onTrackClick(track) }
@@ -256,7 +254,7 @@ class TrackAdapter(
         }
         Toast.makeText(
             context,
-            "Трек '${track.title}' добавлен в плейлист",
+            "Трек \"${track.title}\" добавлен в плейлист",
             Toast.LENGTH_SHORT
         ).show()
     }
