@@ -73,7 +73,7 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
             serviceConnection,
             Context.BIND_AUTO_CREATE
         )
-
+        view.setOnClickListener {  }
         return view
     }
 

@@ -41,6 +41,7 @@ class PlaylistFragment : Fragment() {
         playlistAdapter = PlaylistAdapter(playlists, this::onPlaylistClick)
         playlistRecyclerView.adapter = playlistAdapter
         loadPlaylists()
+        view.setOnClickListener {  }
     }
 
     private fun loadPlaylists() {

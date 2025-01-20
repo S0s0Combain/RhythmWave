@@ -55,6 +55,8 @@ class TracksFragment : Fragment(), TrackControlCallback {
         tracksRecyclerView = view.findViewById(R.id.tracksRecyclerView)
         trackControlLayout = (activity as MainActivity).trackControlLayout
         pauseButton = (activity as MainActivity).findViewById(R.id.pauseButton)
+        val spaceInPixels = resources.getDimensionPixelSize(R.dimen.space_between_items)
+        tracksRecyclerView.addItemDecoration(SpacesItemDecorations(spaceInPixels))
 
         album = arguments?.getParcelable("album")
         artist = arguments?.getParcelable("artist")
@@ -79,7 +81,7 @@ class TracksFragment : Fragment(), TrackControlCallback {
             serviceConnection,
             Context.BIND_AUTO_CREATE
         )
-
+        view.setOnClickListener {  }
         return view
     }
 
@@ -216,7 +218,7 @@ class TracksFragment : Fragment(), TrackControlCallback {
         } else {
             pauseButton.setImageResource(R.drawable.baseline_play_arrow_24)
         }
-        if(isAdded) {
+        if (isAdded) {
             val playerFragment =
                 parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
             playerFragment?.updateSeekbar(

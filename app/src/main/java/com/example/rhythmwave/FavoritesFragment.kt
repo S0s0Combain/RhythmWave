@@ -65,6 +65,7 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
             serviceConnection,
             Context.BIND_AUTO_CREATE
         )
+        view.setOnClickListener { }
     }
 
     private fun loadFavoriteTracks() {

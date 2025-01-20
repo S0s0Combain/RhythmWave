@@ -85,6 +85,7 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
         tracksList.adapter = trackAdapter
 
         tracks = mutableListOf()
+        view.setOnClickListener {  }
     }
 
     override fun onDestroy() {
