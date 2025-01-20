@@ -11,6 +11,8 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,18 +22,22 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 
-class RecentTracksFragment : Fragment() {
+class RecentTracksFragment : Fragment(), TrackControlCallback {
 
     private lateinit var tracksRecyclerView: RecyclerView
     private lateinit var trackAdapter: TrackAdapter
     private lateinit var tracks: MutableList<Track>
     var musicService: MusicService? = null
     private var isBound = false
+    private lateinit var pauseButton: ImageButton
+    private lateinit var trackControlLayout: ConstraintLayout
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             musicService = (service as MusicService.MusicServiceBinder).getService()
             isBound = true
+            musicService?.setTrackControlCallback(this@RecentTracksFragment)
+            musicService?.setTrackAdapter(trackAdapter)
             loadRecentTracks()
         }
 
@@ -49,6 +55,8 @@ class RecentTracksFragment : Fragment() {
         tracksRecyclerView = view.findViewById(R.id.tracksRecyclerView)
         val spaceInPixels = resources.getDimensionPixelSize(R.dimen.space_between_items)
         tracksRecyclerView.addItemDecoration(SpacesItemDecorations(spaceInPixels))
+        trackControlLayout = (activity as MainActivity).findViewById(R.id.trackControlLayout)
+        pauseButton = (activity as MainActivity).findViewById(R.id.pauseButton)
 
         trackAdapter = TrackAdapter(
             onTrackClick = { track ->
@@ -74,9 +82,17 @@ class RecentTracksFragment : Fragment() {
         if(currentTrackList!=tracks){
             musicService?.setTrackList(tracks)
         }
-        MusicService.getInstance()?.playTrack(track)
-        (requireActivity() as MainActivity).showTrackControl(track)
-        openPlayerFragment()
+        if (musicService?.getCurrentTrack() == track) {
+            if (musicService?.isPlaying() == true) {
+                musicService?.pauseTrack()
+            } else {
+                musicService?.resumeTrack()
+                openPlayerFragment(musicService)
+            }
+        } else {
+            musicService?.playTrack(track)
+            openPlayerFragment(musicService)
+        }
     }
 
     private fun loadRecentTracks() {
@@ -159,11 +175,38 @@ class RecentTracksFragment : Fragment() {
         }
     }
 
-    private fun openPlayerFragment() {
+    private fun deleteTrack(track: Track) {
 
     }
 
-    private fun deleteTrack(track: Track) {
+    private fun openPlayerFragment(musicService: MusicService?) {
+        trackControlLayout.visibility = View.GONE
+        val playerFragment = PlayerFragment().apply {
+            this.musicService = musicService
+        }
+        requireActivity().supportFragmentManager.beginTransaction()
+            .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
+            .add(R.id.fragmentContainer, playerFragment)
+            .addToBackStack(null)
+            .commit()
+    }
 
+    override fun onTrackChanged(track: Track) {
+        (activity as MainActivity).showTrackControl(track)
+    }
+
+    override fun onPlaybackStateChanged(isPlaying: Boolean) {
+        if (isPlaying) {
+            pauseButton.setImageResource(R.drawable.baseline_pause_24)
+        } else {
+            pauseButton.setImageResource(R.drawable.baseline_play_arrow_24)
+        }
+
+        val playerFragment =
+            parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+        playerFragment?.updateSeekbar(
+            musicService?.getCurrentPosition() ?: 0,
+            musicService?.getCurrentTrack()?.duration ?: 0
+        )
     }
 }

@@ -10,6 +10,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +22,8 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
     private lateinit var favoriteRecyclerView: RecyclerView
     private lateinit var favoriteTrackAdapter: FavoriteTrackAdapter
     private val favoriteTracks = mutableListOf<FavoriteTrack>()
+    private lateinit var pauseButton: ImageButton
+    private lateinit var trackControlLayout: ConstraintLayout
 
     var musicService: MusicService? = null
     private var isBound = false
@@ -28,13 +32,13 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             musicService = (service as MusicService.MusicServiceBinder).getService()
             isBound = true
+            musicService?.setFavoriteTrackAdapter(favoriteTrackAdapter)
             loadFavoriteTracks()
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
             isBound = false
         }
-
     }
 
     override fun onCreateView(
@@ -53,6 +57,8 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
         favoriteTrackAdapter = FavoriteTrackAdapter(favoriteTracks) { track ->
             onTrackClick(track)
         }
+        trackControlLayout = (activity as MainActivity).findViewById(R.id.trackControlLayout)
+        pauseButton = (activity as MainActivity).findViewById(R.id.pauseButton)
         favoriteRecyclerView.adapter = favoriteTrackAdapter
         context?.bindService(
             Intent(context, MusicService::class.java),
@@ -96,7 +102,17 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
             })
         }
 
-        musicService?.playTrack(trackToPlay)
+        if (musicService?.getCurrentTrack() == trackToPlay) {
+            if (musicService?.isPlaying() == true) {
+                musicService?.pauseTrack()
+            } else {
+                musicService?.resumeTrack()
+                openPlayerFragment(musicService!!)
+            }
+        } else {
+            musicService?.playTrack(trackToPlay)
+            openPlayerFragment(musicService!!)
+        }
     }
 
     override fun onTrackChanged(track: Track) {
@@ -104,6 +120,29 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onPlaybackStateChanged(isPlaying: Boolean) {
+        if (isPlaying) {
+            pauseButton.setImageResource(R.drawable.baseline_pause_24)
+        } else {
+            pauseButton.setImageResource(R.drawable.baseline_play_arrow_24)
+        }
 
+        val playerFragment =
+            parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+        playerFragment?.updateSeekbar(
+            musicService?.getCurrentPosition() ?: 0,
+            musicService?.getCurrentTrack()?.duration ?: 0
+        )
+    }
+
+    private fun openPlayerFragment(musicService: MusicService) {
+        trackControlLayout.visibility = View.GONE
+        val playerFragment = PlayerFragment().apply {
+            this.musicService = musicService
+        }
+        requireActivity().supportFragmentManager.beginTransaction()
+            .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
+            .add(R.id.fragmentContainer, playerFragment)
+            .addToBackStack(null)
+            .commit()
     }
 }

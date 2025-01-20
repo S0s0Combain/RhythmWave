@@ -12,6 +12,7 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,6 +23,7 @@ class TracksFragment : Fragment(), TrackControlCallback {
 
     private lateinit var tracksRecyclerView: RecyclerView
     private lateinit var trackAdapter: TrackAdapter
+    private lateinit var pauseButton: ImageButton
     private lateinit var trackControlLayout: ConstraintLayout
     private var album: Album? = null
     private var artist: Artist? = null
@@ -34,6 +36,8 @@ class TracksFragment : Fragment(), TrackControlCallback {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             musicService = (service as MusicService.MusicServiceBinder).getService()
             isBound = true
+            musicService?.setTrackControlCallback(this@TracksFragment)
+            musicService?.setTrackAdapter(trackAdapter)
             loadTracks()
         }
 
@@ -50,6 +54,7 @@ class TracksFragment : Fragment(), TrackControlCallback {
         val view = inflater.inflate(R.layout.fragment_album_tracks, container, false)
         tracksRecyclerView = view.findViewById(R.id.tracksRecyclerView)
         trackControlLayout = (activity as MainActivity).trackControlLayout
+        pauseButton = (activity as MainActivity).findViewById(R.id.pauseButton)
 
         album = arguments?.getParcelable("album")
         artist = arguments?.getParcelable("artist")
@@ -83,9 +88,17 @@ class TracksFragment : Fragment(), TrackControlCallback {
         if (currentTrackList != tracks) {
             musicService?.setTrackList(tracks)
         }
-        MusicService.getInstance()?.playTrack(track)
-        (requireActivity() as MainActivity).showTrackControl(track)
-        openPlayerFragment(MusicService.getInstance())
+        if (musicService?.getCurrentTrack() == track) {
+            if (musicService?.isPlaying() == true) {
+                musicService?.pauseTrack()
+            } else {
+                musicService?.resumeTrack()
+                openPlayerFragment(musicService)
+            }
+        } else {
+            musicService?.playTrack(track)
+            openPlayerFragment(musicService)
+        }
     }
 
     private fun loadTracks() {
@@ -130,7 +143,6 @@ class TracksFragment : Fragment(), TrackControlCallback {
                         continue
                     }
 
-                    // Получаем изображение альбома из идентификатора трека
                     val albumArt = getAlbumArt(requireContext(), id)
 
                     tracks.add(Track(title, artist, duration, id, albumArt))
@@ -199,6 +211,18 @@ class TracksFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onPlaybackStateChanged(isPlaying: Boolean) {
-        (requireActivity() as MainActivity).onPlaybackStateChanged(isPlaying)
+        if (isPlaying) {
+            pauseButton.setImageResource(R.drawable.baseline_pause_24)
+        } else {
+            pauseButton.setImageResource(R.drawable.baseline_play_arrow_24)
+        }
+        if(isAdded) {
+            val playerFragment =
+                parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+            playerFragment?.updateSeekbar(
+                musicService?.getCurrentPosition() ?: 0,
+                musicService?.getCurrentTrack()?.duration ?: 0
+            )
+        }
     }
 }

@@ -30,9 +30,7 @@ class TrackListFragment : Fragment(), TrackControlCallback {
     private lateinit var trackImage: ImageView
     private lateinit var trackTitleTextView: TextView
     private lateinit var artistTextView: TextView
-    private lateinit var prevButton: ImageButton
     private lateinit var pauseButton: ImageButton
-    private lateinit var nextButton: ImageButton
     private lateinit var fragmentContainer: FrameLayout
     private lateinit var tracks: MutableList<Track>
 
@@ -71,14 +69,9 @@ class TrackListFragment : Fragment(), TrackControlCallback {
         trackImage = (activity as MainActivity).findViewById(R.id.trackImage)
         trackTitleTextView = (activity as MainActivity).findViewById(R.id.trackTitleTextView)
         artistTextView = (activity as MainActivity).findViewById(R.id.artistTextView)
-        prevButton = (activity as MainActivity).findViewById(R.id.prevButton)
         pauseButton = (activity as MainActivity).findViewById(R.id.pauseButton)
-        nextButton = (activity as MainActivity).findViewById(R.id.nextButton)
         fragmentContainer = (activity as MainActivity).findViewById(R.id.fragmentContainer)
-
-        prevButton.setOnClickListener { musicService?.previousTrack() }
-        pauseButton.setOnClickListener { musicService?.togglePlayPause() }
-        nextButton.setOnClickListener { musicService?.nextTrack() }
+        trackControlLayout.setOnClickListener { openPlayerFragment(musicService) }
 
         context?.bindService(
             Intent(context, MusicService::class.java),

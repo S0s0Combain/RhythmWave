@@ -28,7 +28,9 @@ class MusicService : Service() {
     private var currentTrackIndex: Int = 0
     private var trackControlCallback: TrackControlCallback? = null
     private lateinit var equalizer: Equalizer
-    private lateinit var trackAdapter: TrackAdapter
+    private var trackAdapter: TrackAdapter? = null
+    private var favoriteTrackAdapter: FavoriteTrackAdapter? = null
+    private var updateFavoriteAdapter: Boolean = false
 
     private val binder = MusicServiceBinder()
 
@@ -72,7 +74,6 @@ class MusicService : Service() {
         level910Hz: Int,
         level3_6kHz: Int,
         level14kHz: Int
-//        isSurround: Boolean // Объемный звук
     ) {
         if (::equalizer.isInitialized) {
             equalizer.setBandLevel(0, (level60Hz * 10).toShort()) // 60Hz
@@ -85,10 +86,6 @@ class MusicService : Service() {
             bassBoost.setEnabled(true)
             bassBoost.setStrength((bassLevel * 10).toShort())
 
-//            if (isSurround) {
-
-//            } else {
-//            }
             equalizer.setEnabled(true)
         }
     }
@@ -116,12 +113,22 @@ class MusicService : Service() {
             AppDatabase.getDatabase(applicationContext).recentTrackDao()
                 .deleteOldRecords(sevenDaysAgo)
         }
-        trackAdapter.updateCurrentTrack(track)
+        if (updateFavoriteAdapter) {
+            favoriteTrackAdapter?.updateCurrentTrack(track)
+        } else {
+            trackAdapter?.updateCurrentTrack(track)
+        }
         notifyPlaybackStateChanged(true)
     }
 
-    fun setTrackAdapter(trackAdapter: TrackAdapter){
+    fun setTrackAdapter(trackAdapter: TrackAdapter) {
         this.trackAdapter = trackAdapter
+        updateFavoriteAdapter = false
+    }
+
+    fun setFavoriteTrackAdapter(favoriteTrackAdapter: FavoriteTrackAdapter) {
+        this.favoriteTrackAdapter = favoriteTrackAdapter
+        updateFavoriteAdapter = true
     }
 
     fun pauseTrack() {

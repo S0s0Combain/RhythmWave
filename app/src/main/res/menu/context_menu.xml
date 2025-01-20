@@ -4,9 +4,6 @@
         android:id="@+id/menu_add_to_favorites"
         android:title="@string/add_to_favorites" />
     <item
-        android:id="@+id/menu_add_to_queue"
-        android:title="@string/add_to_queue" />
-    <item
         android:id="@+id/menu_add_to_playlist"
         android:title="@string/add_to_playlist" />
     <item
