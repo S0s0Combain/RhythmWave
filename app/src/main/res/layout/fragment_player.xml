@@ -62,6 +62,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
+        android:progressBackgroundTint="@color/light_gray2"
+        android:progressTint="@color/accent_color_blue"
+        android:thumbTint="@color/accent_color_blue"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

@@ -12,7 +12,9 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,6 +27,7 @@ class TracksFragment : Fragment(), TrackControlCallback {
     private lateinit var trackAdapter: TrackAdapter
     private lateinit var pauseButton: ImageButton
     private lateinit var trackControlLayout: ConstraintLayout
+    private lateinit var titleTextView: TextView
     private var album: Album? = null
     private var artist: Artist? = null
     private lateinit var tracks: MutableList<Track>
@@ -51,12 +54,14 @@ class TracksFragment : Fragment(), TrackControlCallback {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_album_tracks, container, false)
+        val view = inflater.inflate(R.layout.fragment_tracks, container, false)
         tracksRecyclerView = view.findViewById(R.id.tracksRecyclerView)
         trackControlLayout = (activity as MainActivity).trackControlLayout
         pauseButton = (activity as MainActivity).findViewById(R.id.pauseButton)
         val spaceInPixels = resources.getDimensionPixelSize(R.dimen.space_between_items)
         tracksRecyclerView.addItemDecoration(SpacesItemDecorations(spaceInPixels))
+        titleTextView = view.findViewById(R.id.titleTextView)
+        titleTextView.setText(arguments?.getString("title"))
 
         album = arguments?.getParcelable("album")
         artist = arguments?.getParcelable("artist")
@@ -81,7 +86,7 @@ class TracksFragment : Fragment(), TrackControlCallback {
             serviceConnection,
             Context.BIND_AUTO_CREATE
         )
-        view.setOnClickListener {  }
+        view.setOnClickListener { }
         return view
     }
 
@@ -209,7 +214,9 @@ class TracksFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onTrackChanged(track: Track) {
-        (requireActivity() as MainActivity).showTrackControl(track)
+        if (isAdded) {
+            (requireActivity() as MainActivity).showTrackControl(track)
+        }
     }
 
     override fun onPlaybackStateChanged(isPlaying: Boolean) {

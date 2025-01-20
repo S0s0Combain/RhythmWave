@@ -53,7 +53,8 @@ class ArtistsFragment : Fragment() {
         cursor?.use {
             if (it.moveToFirst()) {
                 do {
-                    val artist = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST))
+                    val artist =
+                        it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST))
                     if (artist != "<unknown>") {
                         val count = artistsMap.getOrDefault(artist, 0) + 1
                         artistsMap[artist] = count
@@ -69,6 +70,7 @@ class ArtistsFragment : Fragment() {
     private fun openArtistTracksFragment(artist: Artist) {
         val artistTracksFragment = TracksFragment().apply {
             arguments = Bundle().apply {
+                putString("title", artist.name)
                 putParcelable("artist", artist)
             }
         }

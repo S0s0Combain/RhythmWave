@@ -31,6 +31,7 @@ class AlbumsFragment : Fragment() {
             onAlbumClick = { album ->
                 val albumTracksFragment = TracksFragment().apply {
                     arguments = Bundle().apply {
+                        putString("title", album.name)
                         putParcelable("album", album)
                     }
                 }
