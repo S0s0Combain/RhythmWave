@@ -19,6 +19,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import java.io.ByteArrayOutputStream
 
 class TracksFragment : Fragment(), TrackControlCallback {
@@ -31,6 +32,7 @@ class TracksFragment : Fragment(), TrackControlCallback {
     private var album: Album? = null
     private var artist: Artist? = null
     private lateinit var tracks: MutableList<Track>
+    private lateinit var randomButton: MaterialButton
 
     var musicService: MusicService? = null
     private var isBound = false
@@ -62,6 +64,7 @@ class TracksFragment : Fragment(), TrackControlCallback {
         tracksRecyclerView.addItemDecoration(SpacesItemDecorations(spaceInPixels))
         titleTextView = view.findViewById(R.id.titleTextView)
         titleTextView.setText(arguments?.getString("title"))
+        randomButton = view.findViewById(R.id.randomButton)
 
         album = arguments?.getParcelable("album")
         artist = arguments?.getParcelable("artist")
@@ -86,8 +89,26 @@ class TracksFragment : Fragment(), TrackControlCallback {
             serviceConnection,
             Context.BIND_AUTO_CREATE
         )
+        randomButton.setOnClickListener { shuffleTracks() }
         view.setOnClickListener { }
         return view
+    }
+
+    private fun shuffleTracks() {
+        val currentTrackList = musicService?.getTrackList() ?: return
+
+        if (currentTrackList != tracks) {
+            musicService?.setTrackList(tracks.map {
+                Track(
+                    it.title,
+                    it.artist,
+                    it.duration,
+                    it.id,
+                    it.albumArt
+                )
+            })
+            musicService?.shuffleTrackList()
+        }
     }
 
     private fun onTrackClick(track: Track) {

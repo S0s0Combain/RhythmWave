@@ -1,14 +1,25 @@
 package com.example.rhythmwave
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
 import android.net.Uri
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import android.provider.MediaStore
+import android.support.v4.media.session.MediaSessionCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.media.session.MediaButtonReceiver
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
@@ -31,6 +42,8 @@ class MusicService : Service() {
     private var trackAdapter: TrackAdapter? = null
     private var favoriteTrackAdapter: FavoriteTrackAdapter? = null
     private var updateFavoriteAdapter: Boolean = false
+    private lateinit var mediaSession: MediaSessionCompat
+    private lateinit var mediaSessionCallback: MediaSessionCompat.Callback
 
     private val binder = MusicServiceBinder()
 
@@ -41,6 +54,10 @@ class MusicService : Service() {
         fun getInstance(): MusicService? {
             return instance
         }
+
+        const val ACTION_PLAY_PAUSE = "com.example.rhythmwave.ACTION_PLAY_PAUSE"
+        const val ACTION_NEXT = "com.example.rhythmwave.ACTION_NEXT"
+        const val ACTION_PREVIOUS = "com.example.rhythmwave.ACTION_PREVIOUS"
     }
 
     override fun onCreate() {
@@ -49,6 +66,36 @@ class MusicService : Service() {
         exoPlayer = SimpleExoPlayer.Builder(this).build()
         equalizer = Equalizer(0, getAudioSessionId())
         equalizer.enabled = true
+
+        mediaSession = MediaSessionCompat(this, "MusicService")
+        mediaSessionCallback = object : MediaSessionCompat.Callback() {
+            override fun onPlay() {
+                super.onPlay()
+                resumeTrack()
+            }
+
+            override fun onPause() {
+                super.onPause()
+                pauseTrack()
+            }
+
+            override fun onSkipToNext() {
+                super.onSkipToNext()
+                nextTrack()
+            }
+
+            override fun onSkipToPrevious() {
+                super.onSkipToPrevious()
+                previousTrack()
+            }
+
+            override fun onStop() {
+                super.onStop()
+                pauseTrack()
+            }
+        }
+        mediaSession.setCallback(mediaSessionCallback)
+        mediaSession.isActive = true
 
         (exoPlayer as SimpleExoPlayer).addListener(object : Player.Listener {
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
@@ -60,6 +107,13 @@ class MusicService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        intent?.action?.let { action ->
+            when (action) {
+                ACTION_PLAY_PAUSE -> togglePlayPause()
+                ACTION_NEXT -> nextTrack()
+                ACTION_PREVIOUS -> previousTrack()
+            }
+        }
         return START_STICKY
     }
 
@@ -119,6 +173,7 @@ class MusicService : Service() {
             trackAdapter?.updateCurrentTrack(track)
         }
         notifyPlaybackStateChanged(true)
+        updateNotification()
     }
 
     fun setTrackAdapter(trackAdapter: TrackAdapter) {
@@ -134,16 +189,19 @@ class MusicService : Service() {
     fun pauseTrack() {
         exoPlayer.playWhenReady = false
         notifyPlaybackStateChanged(false)
+        updateNotification()
     }
 
     fun resumeTrack() {
         exoPlayer.playWhenReady = true
         notifyPlaybackStateChanged(true)
+        updateNotification()
     }
 
     fun togglePlayPause() {
         exoPlayer.playWhenReady = !exoPlayer.playWhenReady
         notifyPlaybackStateChanged(exoPlayer.playWhenReady)
+        updateNotification()
     }
 
     fun previousTrack() {
@@ -183,6 +241,12 @@ class MusicService : Service() {
         return exoPlayer.playWhenReady
     }
 
+    fun shuffleTrackList() {
+        trackList = trackList.shuffled()
+        currentTrackIndex = 0
+        playTrack(trackList[currentTrackIndex])
+    }
+
     fun setTrackControlCallback(callback: TrackControlCallback) {
         trackControlCallback = callback
     }
@@ -208,5 +272,69 @@ class MusicService : Service() {
             equalizer.release()
         }
         exoPlayer.release()
+    }
+
+    private fun createNotification(): Notification {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val channelId = "music_channel"
+        val channelName = "Music Channel"
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
+            .setMediaSession(mediaSession.sessionToken)
+            .setShowActionsInCompactView(0, 1, 2)
+
+        val playPauseIntent = PendingIntent.getService(
+            this,
+            0,
+            Intent(this, MusicService::class.java).setAction(ACTION_PLAY_PAUSE),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val nextIntent = PendingIntent.getService(
+            this,
+            1,
+            Intent(this, MusicService::class.java).setAction(ACTION_NEXT),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val prevIntent = PendingIntent.getService(
+            this,
+            2,
+            Intent(this, MusicService::class.java).setAction(ACTION_PREVIOUS),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val bitmap: Bitmap? = currentTrack?.albumArt?.let {
+            BitmapFactory.decodeByteArray(it, 0, it.size)
+        }
+
+        val playPauseIcon = if (exoPlayer.playWhenReady) {
+            R.drawable.baseline_pause_24
+        } else {
+            R.drawable.baseline_play_arrow_24
+        }
+
+        return NotificationCompat.Builder(this, channelId)
+            .setContentTitle(currentTrack?.title ?: "No Track")
+            .setContentText(currentTrack?.artist ?: "Unknown Artist")
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setLargeIcon(bitmap)
+            .setStyle(mediaStyle)
+            .addAction(R.drawable.baseline_skip_previous_24, "Previous", prevIntent)
+            .addAction(playPauseIcon, "Pause", playPauseIntent)
+            .addAction(R.drawable.baseline_skip_next_24, "Next", nextIntent)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .build()
+    }
+
+    private fun updateNotification() {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notification = createNotification()
+        notificationManager.notify(1, notification)
     }
 }

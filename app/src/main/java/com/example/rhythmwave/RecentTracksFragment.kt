@@ -16,6 +16,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,6 +32,7 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
     private var isBound = false
     private lateinit var pauseButton: ImageButton
     private lateinit var trackControlLayout: ConstraintLayout
+    private lateinit var randomButton: MaterialButton
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -44,7 +46,6 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
         override fun onServiceDisconnected(name: ComponentName?) {
             isBound = false
         }
-
     }
 
     override fun onCreateView(
@@ -57,12 +58,19 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
         tracksRecyclerView.addItemDecoration(SpacesItemDecorations(spaceInPixels))
         trackControlLayout = (activity as MainActivity).findViewById(R.id.trackControlLayout)
         pauseButton = (activity as MainActivity).findViewById(R.id.pauseButton)
+        randomButton = view.findViewById(R.id.randomButton)
 
         trackAdapter = TrackAdapter(
             onTrackClick = { track ->
                 onTrackClick(track)
             },
-            onShareClick = { track -> TrackUtils.shareTrack(requireContext(), track, requireContext().contentResolver) },
+            onShareClick = { track ->
+                TrackUtils.shareTrack(
+                    requireContext(),
+                    track,
+                    requireContext().contentResolver
+                )
+            },
             onDeleteTrack = { track -> deleteTrack(track) }
         )
 
@@ -73,13 +81,31 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
             serviceConnection,
             Context.BIND_AUTO_CREATE
         )
-        view.setOnClickListener {  }
+        randomButton.setOnClickListener { shuffleTracks() }
+        view.setOnClickListener { }
         return view
     }
 
-    private fun onTrackClick(track: Track){
+    private fun shuffleTracks() {
         val currentTrackList = musicService?.getTrackList() ?: return
-        if(currentTrackList!=tracks){
+
+        if (currentTrackList != tracks) {
+            musicService?.setTrackList(tracks.map {
+                Track(
+                    it.title,
+                    it.artist,
+                    it.duration,
+                    it.id,
+                    it.albumArt
+                )
+            })
+            musicService?.shuffleTrackList()
+        }
+    }
+
+    private fun onTrackClick(track: Track) {
+        val currentTrackList = musicService?.getTrackList() ?: return
+        if (currentTrackList != tracks) {
             musicService?.setTrackList(tracks)
         }
         if (musicService?.getCurrentTrack() == track) {
@@ -99,7 +125,8 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
         CoroutineScope(Dispatchers.IO).launch {
             val sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000)
 
-            val recentTracks = AppDatabase.getDatabase(requireContext()).recentTrackDao().getRecentTracks(sevenDaysAgo)
+            val recentTracks = AppDatabase.getDatabase(requireContext()).recentTrackDao()
+                .getRecentTracks(sevenDaysAgo)
 
             tracks = mutableListOf()
 
@@ -108,7 +135,10 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
                 if (track != null) {
                     tracks.add(track)
                 } else {
-                   TODO("Реализовать удаление треков, которые не были найдены")
+                    CoroutineScope(Dispatchers.IO).launch {
+                        AppDatabase.getDatabase(requireContext()).recentTrackDao()
+                            .deleteByTrackId(recentTrack.trackId)
+                    }
                 }
             }
 
@@ -157,7 +187,8 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
         context.contentResolver.query(uri, projection, selection, selectionArgs, null)
             ?.use { cursor ->
                 if (cursor.moveToFirst()) {
-                    albumId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
+                    albumId =
+                        cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
                 }
             }
 
@@ -192,7 +223,9 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onTrackChanged(track: Track) {
-        (activity as MainActivity).showTrackControl(track)
+        if (isAdded) {
+            (activity as MainActivity).showTrackControl(track)
+        }
     }
 
     override fun onPlaybackStateChanged(isPlaying: Boolean) {
@@ -201,12 +234,13 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
         } else {
             pauseButton.setImageResource(R.drawable.baseline_play_arrow_24)
         }
-
-        val playerFragment =
-            parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
-        playerFragment?.updateSeekbar(
-            musicService?.getCurrentPosition() ?: 0,
-            musicService?.getCurrentTrack()?.duration ?: 0
-        )
+        if (isAdded) {
+            val playerFragment =
+                parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+            playerFragment?.updateSeekbar(
+                musicService?.getCurrentPosition() ?: 0,
+                musicService?.getCurrentTrack()?.duration ?: 0
+            )
+        }
     }
 }

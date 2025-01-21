@@ -63,7 +63,14 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
 
         buttonDown.setOnClickListener { collapseFragment() }
         prevButton.setOnClickListener { musicService?.previousTrack() }
-        pauseButton.setOnClickListener { musicService?.togglePlayPause() }
+        pauseButton.setOnClickListener {
+            if (musicService?.isPlaying() == true) {
+                pauseButton.setImageResource(R.drawable.ic_play)
+            } else {
+                pauseButton.setImageResource(R.drawable.baseline_pause_circle_24)
+            }
+            musicService?.togglePlayPause()
+        }
         nextButton.setOnClickListener { musicService?.nextTrack() }
         fragmentSeekBar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -156,8 +163,6 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
 
         view?.startAnimation(animation)
     }
-
-
 
     override fun onDown(e: MotionEvent): Boolean {
         return true

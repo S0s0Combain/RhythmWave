@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,6 +25,7 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
     private val favoriteTracks = mutableListOf<FavoriteTrack>()
     private lateinit var pauseButton: ImageButton
     private lateinit var trackControlLayout: ConstraintLayout
+    private lateinit var randomButton: MaterialButton
 
     var musicService: MusicService? = null
     private var isBound = false
@@ -59,6 +61,10 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
         }
         trackControlLayout = (activity as MainActivity).findViewById(R.id.trackControlLayout)
         pauseButton = (activity as MainActivity).findViewById(R.id.pauseButton)
+        randomButton = view.findViewById(R.id.randomButton)
+        randomButton.setOnClickListener {
+            shuffleTracks()
+        }
         favoriteRecyclerView.adapter = favoriteTrackAdapter
         context?.bindService(
             Intent(context, MusicService::class.java),
@@ -66,6 +72,23 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
             Context.BIND_AUTO_CREATE
         )
         view.setOnClickListener { }
+    }
+
+    private fun shuffleTracks() {
+        val currentTrackList = musicService?.getTrackList() ?: return
+
+        if (currentTrackList != favoriteTracks) {
+            musicService?.setTrackList(favoriteTracks.map {
+                Track(
+                    it.title,
+                    it.artist,
+                    it.duration,
+                    it.id,
+                    it.albumArt
+                )
+            })
+            musicService?.shuffleTrackList()
+        }
     }
 
     private fun loadFavoriteTracks() {
