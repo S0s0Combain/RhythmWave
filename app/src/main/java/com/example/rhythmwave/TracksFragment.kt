@@ -154,7 +154,7 @@ class TracksFragment : Fragment(), TrackControlCallback {
             null
         )
 
-        tracks = mutableListOf<Track>()
+        tracks = mutableListOf()
         cursor?.use {
             if (it.moveToFirst()) {
                 do {

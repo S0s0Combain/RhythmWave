@@ -13,7 +13,9 @@ import androidx.recyclerview.widget.RecyclerView
 
 class FavoriteTrackAdapter(
     private val tracks: List<FavoriteTrack>,
-    private val onTrackClick: (FavoriteTrack) -> Unit
+    private val onTrackClick: (FavoriteTrack) -> Unit,
+    private val onShareClick: (FavoriteTrack) -> Unit,
+    private val onDeleteClick: (FavoriteTrack) -> Unit
 ) : RecyclerView.Adapter<FavoriteTrackAdapter.FavoriteTrackViewHolder>() {
     private var currentTrack: Track? = null
 
@@ -23,11 +25,11 @@ class FavoriteTrackAdapter(
         val trackImageView = itemView.findViewById<ImageView>(R.id.trackImage)
         val equalizerView = itemView.findViewById<EqualizerView>(R.id.equalizerView)
         val replyImageView = itemView.findViewById<ImageView>(R.id.replyImageView)
-        val contextMenuImageView = itemView.findViewById<ImageButton>(R.id.contextMenuImageView)
+        val deleteTrackFromFavorites = itemView.findViewById<ImageButton>(R.id.deleteTrackFromFavorites)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavoriteTrackViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.track_item, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.favorite_item, parent, false)
         return FavoriteTrackViewHolder(view)
     }
 
@@ -60,7 +62,7 @@ class FavoriteTrackAdapter(
                     R.color.accent_color_blue
                 )
             )
-            holder.contextMenuImageView.setColorFilter(
+            holder.deleteTrackFromFavorites.setColorFilter(
                 ContextCompat.getColor(
                     holder.itemView.context,
                     R.color.accent_color_blue
@@ -80,13 +82,16 @@ class FavoriteTrackAdapter(
                     R.color.light_gray2
                 )
             )
-            holder.contextMenuImageView.setColorFilter(
+            holder.deleteTrackFromFavorites.setColorFilter(
                 ContextCompat.getColor(
                     holder.itemView.context,
                     R.color.light_gray2
                 )
             )
         }
+
+        holder.replyImageView.setOnClickListener { onShareClick(track) }
+        holder.deleteTrackFromFavorites.setOnClickListener { onDeleteClick(track) }
     }
 
     override fun getItemCount() = tracks.size

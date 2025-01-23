@@ -18,4 +18,10 @@ interface FavoriteTrackDao {
 
     @Query("SELECT COUNT(*) FROM favorites WHERE id = :trackId")
     suspend fun isTrackFavorite(trackId: Long): Int
+
+    @Query("DELETE FROM favorites")
+    suspend fun clearFavoritesTracks()
+
+    @Query("DELETE FROM favorites WHERE id = :trackId")
+    suspend fun removeTrackFromFavorites(trackId: Long)
 }

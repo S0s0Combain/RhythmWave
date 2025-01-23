@@ -17,6 +17,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -93,9 +94,24 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
         prevButton.setOnClickListener { MusicService.getInstance()?.previousTrack() }
         pauseButton.setOnClickListener { MusicService.getInstance()?.togglePlayPause() }
         nextButton.setOnClickListener { MusicService.getInstance()?.nextTrack() }
-        favoritesCardView.setOnClickListener { replaceFragment(R.id.fragmentContainer, FavoritesFragment()) }
-        playlistsCardView.setOnClickListener { replaceFragment(R.id.fragmentContainer, PlaylistFragment()) }
-        recentTracksCardView.setOnClickListener { replaceFragment(R.id.fragmentContainer, RecentTracksFragment()) }
+        favoritesCardView.setOnClickListener {
+            replaceFragment(
+                R.id.fragmentContainer,
+                FavoritesFragment()
+            )
+        }
+        playlistsCardView.setOnClickListener {
+            replaceFragment(
+                R.id.fragmentContainer,
+                PlaylistFragment()
+            )
+        }
+        recentTracksCardView.setOnClickListener {
+            replaceFragment(
+                R.id.fragmentContainer,
+                RecentTracksFragment()
+            )
+        }
 
         applyEqualizerSettings()
     }
@@ -155,7 +171,11 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
     }
 
     override fun onTrackChanged(track: Track) {
-        showTrackControl(track)
+        val fragmentManager = supportFragmentManager
+        val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
+        if (currentFragment !is PlayerFragment) {
+            showTrackControl(track)
+        }
     }
 
     override fun onPlaybackStateChanged(isPlaying: Boolean) {
@@ -174,19 +194,33 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
     }
 
     fun showTrackControl(track: Track) {
-        trackControlLayout.visibility = View.VISIBLE
-        if (track.albumArt != null) {
-            val bitmap =
-                BitmapFactory.decodeByteArray(track.albumArt, 0, track.albumArt.size)
-            val roundedBitmap = ImageUtils.roundCorner(bitmap, 40f)
-            trackImage.setImageBitmap(roundedBitmap)
-        }
-        trackTitleTextView.text = track.title
-        artistTextView.text = track.artist
+        trackControlLayout.post {
+            trackControlLayout.visibility = View.VISIBLE
 
-        val playerFragment =
-            supportFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
-        playerFragment?.updateTrackInfo(track)
+            if (track.albumArt != null) {
+                val bitmap = BitmapFactory.decodeByteArray(track.albumArt, 0, track.albumArt.size)
+                val roundedBitmap = ImageUtils.roundCorner(bitmap, 40f)
+                trackImage.setImageBitmap(roundedBitmap)
+            }
+
+            trackTitleTextView.text = track.title
+            artistTextView.text = track.artist
+
+            val playerFragment =
+                supportFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+            playerFragment?.updateTrackInfo(track)
+
+            val main = findViewById<ConstraintLayout>(R.id.main)
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(main)
+            constraintSet.connect(
+                R.id.fragmentContainer,
+                ConstraintSet.BOTTOM,
+                R.id.trackControlLayout,
+                ConstraintSet.TOP
+            )
+            constraintSet.applyTo(main)
+        }
     }
 
     override fun onBackPressed() {

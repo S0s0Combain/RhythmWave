@@ -14,6 +14,7 @@ import android.widget.ImageButton
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,6 +27,7 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
     private lateinit var pauseButton: ImageButton
     private lateinit var trackControlLayout: ConstraintLayout
     private lateinit var randomButton: MaterialButton
+    private lateinit var clearImageButton: ImageButton
 
     var musicService: MusicService? = null
     private var isBound = false
@@ -56,9 +58,16 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
         favoriteRecyclerView.addItemDecoration(SpacesItemDecorations(spaceInPixels))
         favoriteRecyclerView.layoutManager =
             androidx.recyclerview.widget.LinearLayoutManager(context)
-        favoriteTrackAdapter = FavoriteTrackAdapter(favoriteTracks) { track ->
+        favoriteTrackAdapter = FavoriteTrackAdapter(favoriteTracks, onTrackClick = { track ->
             onTrackClick(track)
-        }
+        }, onShareClick = { track ->
+            TrackUtils.shareTrack(
+                requireContext(),
+                Track(track.title, track.artist, track.duration, track.id, track.albumArt),
+                requireContext().contentResolver
+            )
+        },
+            onDeleteClick = { track -> showDeleteConfirmationDialog(track) })
         trackControlLayout = (activity as MainActivity).findViewById(R.id.trackControlLayout)
         pauseButton = (activity as MainActivity).findViewById(R.id.pauseButton)
         randomButton = view.findViewById(R.id.randomButton)
@@ -71,6 +80,9 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
             serviceConnection,
             Context.BIND_AUTO_CREATE
         )
+
+        clearImageButton = view.findViewById(R.id.clearImageButton)
+        clearImageButton.setOnClickListener { showClearConfirmationDialog() }
         view.setOnClickListener { }
     }
 
@@ -168,5 +180,48 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
             .add(R.id.fragmentContainer, playerFragment)
             .addToBackStack(null)
             .commit()
+    }
+
+    private fun showClearConfirmationDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Очистка избранных треков")
+            .setMessage("Вы действительно хотите очистить список избранных треков?")
+            .setPositiveButton("Да") { _, _ ->
+                clearFavoritesTracks()
+            }
+            .setNegativeButton("Нет") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun clearFavoritesTracks() {
+        CoroutineScope(Dispatchers.IO).launch {
+            AppDatabase.getDatabase(requireContext()).favoriteTrackDao().clearFavoritesTracks()
+            loadFavoriteTracks()
+        }
+    }
+
+    private fun showDeleteConfirmationDialog(track: FavoriteTrack) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Подтвердите удаление")
+            .setMessage("Вы действительно хотите удалить трек из плейлиста?")
+            .setPositiveButton("Удалить") { _, _ ->
+                deleteTrackFromFavorites(track)
+            }
+            .setNegativeButton("Отмена") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun deleteTrackFromFavorites(track: FavoriteTrack) {
+        CoroutineScope(Dispatchers.IO).launch {
+            AppDatabase.getDatabase(requireContext()).favoriteTrackDao()
+                .removeTrackFromFavorites(track.id)
+            withContext(Dispatchers.Main) {
+                loadFavoriteTracks()
+            }
+        }
     }
 }

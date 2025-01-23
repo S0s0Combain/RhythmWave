@@ -17,8 +17,10 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
@@ -33,6 +35,7 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
     private lateinit var pauseButton: ImageButton
     private lateinit var trackControlLayout: ConstraintLayout
     private lateinit var randomButton: MaterialButton
+    private lateinit var clearImageButton: ImageButton
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -59,6 +62,8 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
         trackControlLayout = (activity as MainActivity).findViewById(R.id.trackControlLayout)
         pauseButton = (activity as MainActivity).findViewById(R.id.pauseButton)
         randomButton = view.findViewById(R.id.randomButton)
+        clearImageButton = view.findViewById(R.id.clearImageButton)
+        clearImageButton.setOnClickListener { showClearConfirmationDialog() }
 
         trackAdapter = TrackAdapter(
             onTrackClick = { track ->
@@ -241,6 +246,26 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
                 musicService?.getCurrentPosition() ?: 0,
                 musicService?.getCurrentTrack()?.duration ?: 0
             )
+        }
+    }
+
+    private fun showClearConfirmationDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Очистка недавних треков")
+            .setMessage("Вы действительно хотите очистить список недавних треков?")
+            .setPositiveButton("Да") { _, _ ->
+                clearRecentTracks()
+            }
+            .setNegativeButton("Нет") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun clearRecentTracks() {
+        CoroutineScope(Dispatchers.IO).launch {
+            AppDatabase.getDatabase(requireContext()).recentTrackDao().clearRecentTracks()
+            loadRecentTracks()
         }
     }
 }

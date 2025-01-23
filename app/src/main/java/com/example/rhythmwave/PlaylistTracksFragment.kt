@@ -18,9 +18,11 @@ import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,12 +39,16 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
     private lateinit var playlistImage: ImageView
     private lateinit var tracks: MutableList<Track>
     private lateinit var editPlaylistButton: ImageButton
+    private lateinit var pauseButton: ImageButton
+    private lateinit var trackControlLayout: ConstraintLayout
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as MusicService.MusicServiceBinder
             musicService = binder.getService()
             isBound = true
+            musicService?.setTrackControlCallback(this@PlaylistTracksFragment)
+            musicService?.setPlaylistTrackAdapter(trackAdapter)
             loadTracks()
         }
 
@@ -77,15 +83,24 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
 
         editPlaylistButton = view.findViewById(R.id.editPlaylistButton)
         editPlaylistButton.setOnClickListener { showContextMenu(it) }
-
+        pauseButton = (activity as MainActivity).findViewById(R.id.pauseButton)
         playlistImage = view.findViewById(R.id.playlistImage)
-        trackAdapter = PlaylistTracksAdapter { track ->
-            onTrackClick(track)
-        }
+        trackAdapter = PlaylistTracksAdapter(
+            onTrackClick = { track -> onTrackClick(track) },
+            onShareClick = { track ->
+                TrackUtils.shareTrack(
+                    requireContext(),
+                    track,
+                    requireContext().contentResolver
+                )
+            },
+            onDeleteTrackClick = { track -> showDeleteConfirmationDialog(track) }
+        )
+        trackControlLayout = (activity as MainActivity).trackControlLayout
         tracksList.adapter = trackAdapter
 
         tracks = mutableListOf()
-        view.setOnClickListener {  }
+        view.setOnClickListener { }
     }
 
     override fun onDestroy() {
@@ -101,7 +116,42 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
         if (currentTrackList != tracks) {
             musicService?.setTrackList(tracks)
         }
-        musicService?.playTrack(track)
+        if (musicService?.getCurrentTrack() == track) {
+            if (musicService?.isPlaying() == true) {
+                musicService?.pauseTrack()
+            } else {
+                musicService?.resumeTrack()
+                openPlayerFragment(musicService)
+            }
+        } else {
+            musicService?.playTrack(track)
+            openPlayerFragment(musicService)
+        }
+    }
+
+    private fun showDeleteConfirmationDialog(track: Track) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Подтвердите удаление")
+            .setMessage("Вы действительно хотите удалить трек из плейлиста?")
+            .setPositiveButton("Удалить") { _, _ ->
+                deleteTrackFromPlaylist(track)
+            }
+            .setNegativeButton("Отмена") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun deleteTrackFromPlaylist(track: Track) {
+        playlistId?.let { playlistId ->
+            CoroutineScope(Dispatchers.IO).launch {
+                AppDatabase.getDatabase(requireContext()).playlistTrackDao()
+                    .removeTrackFromPlaylist(playlistId, track.id)
+                withContext(Dispatchers.Main) {
+                    loadTracks()
+                }
+            }
+        }
     }
 
     private fun loadTracks() {
@@ -207,11 +257,25 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onTrackChanged(track: Track) {
-        (activity as MainActivity).showTrackControl(track)
+        if (isAdded) {
+            (activity as MainActivity).showTrackControl(track)
+        }
     }
 
     override fun onPlaybackStateChanged(isPlaying: Boolean) {
-        TODO("Not yet implemented")
+        if (isPlaying) {
+            pauseButton.setImageResource(R.drawable.baseline_pause_24)
+        } else {
+            pauseButton.setImageResource(R.drawable.baseline_play_arrow_24)
+        }
+        if (isAdded) {
+            val playerFragment =
+                parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+            playerFragment?.updateSeekbar(
+                musicService?.getCurrentPosition() ?: 0,
+                musicService?.getCurrentTrack()?.duration ?: 0
+            )
+        }
     }
 
     private fun showContextMenu(view: View) {
@@ -257,6 +321,17 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
                 }
             }
         }
+    }
+
+    private fun openPlayerFragment(musicService: MusicService?) {
+        trackControlLayout.visibility = View.GONE
+        val playerFragment = PlayerFragment().apply {
+            this.musicService = musicService
+        }
+        requireActivity().supportFragmentManager.beginTransaction()
+            .add(R.id.fragmentContainer, playerFragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun onResume() {

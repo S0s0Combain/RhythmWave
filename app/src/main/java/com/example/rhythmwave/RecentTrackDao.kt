@@ -17,4 +17,7 @@ interface RecentTrackDao {
 
     @Query("DELETE FROM recent_tracks WHERE timestamp < :cutoffTime")
     suspend fun deleteOldRecords(cutoffTime: Long): Int
+
+    @Query("DELETE FROM recent_tracks")
+    suspend fun clearRecentTracks()
 }

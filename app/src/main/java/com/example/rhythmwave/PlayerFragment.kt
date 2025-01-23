@@ -51,6 +51,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_player, container, false)
+        (activity as MainActivity).trackControlLayout.visibility = View.GONE
         buttonDown = view.findViewById(R.id.buttonDown)
         titleTextView = view.findViewById(R.id.titleTextView)
         artistTextView = view.findViewById(R.id.artistTextView)
@@ -91,6 +92,11 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         }
         buttonDown = view.findViewById(R.id.buttonDown)
         buttonDown.setOnClickListener { collapseFragment() }
+        if(musicService?.isPlaying() == true){
+            pauseButton.setImageResource(R.drawable.baseline_pause_circle_24)
+        } else{
+            pauseButton.setImageResource(R.drawable.ic_play)
+        }
         return view
     }
 

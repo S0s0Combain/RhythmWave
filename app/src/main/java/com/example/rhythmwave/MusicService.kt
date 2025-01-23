@@ -17,6 +17,7 @@ import android.os.Build
 import android.os.IBinder
 import android.provider.MediaStore
 import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.media.session.MediaButtonReceiver
@@ -41,7 +42,9 @@ class MusicService : Service() {
     private lateinit var equalizer: Equalizer
     private var trackAdapter: TrackAdapter? = null
     private var favoriteTrackAdapter: FavoriteTrackAdapter? = null
+    private var playlistTrackAdapter: PlaylistTracksAdapter? = null
     private var updateFavoriteAdapter: Boolean = false
+    private var updatePlaylistAdapter: Boolean = false
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var mediaSessionCallback: MediaSessionCompat.Callback
 
@@ -92,6 +95,11 @@ class MusicService : Service() {
             override fun onStop() {
                 super.onStop()
                 pauseTrack()
+            }
+
+            override fun onSeekTo(pos: Long) {
+                super.onSeekTo(pos)
+                seekTo(pos.toInt())
             }
         }
         mediaSession.setCallback(mediaSessionCallback)
@@ -169,6 +177,8 @@ class MusicService : Service() {
         }
         if (updateFavoriteAdapter) {
             favoriteTrackAdapter?.updateCurrentTrack(track)
+        } else if (updatePlaylistAdapter) {
+            playlistTrackAdapter?.updateCurrentTrack(track)
         } else {
             trackAdapter?.updateCurrentTrack(track)
         }
@@ -179,11 +189,19 @@ class MusicService : Service() {
     fun setTrackAdapter(trackAdapter: TrackAdapter) {
         this.trackAdapter = trackAdapter
         updateFavoriteAdapter = false
+        updatePlaylistAdapter = false
     }
 
     fun setFavoriteTrackAdapter(favoriteTrackAdapter: FavoriteTrackAdapter) {
         this.favoriteTrackAdapter = favoriteTrackAdapter
         updateFavoriteAdapter = true
+        updatePlaylistAdapter = false
+    }
+
+    fun setPlaylistTrackAdapter(playlistTrackAdapter: PlaylistTracksAdapter) {
+        this.playlistTrackAdapter = playlistTrackAdapter
+        updateFavoriteAdapter = false
+        updatePlaylistAdapter = true
     }
 
     fun pauseTrack() {
@@ -244,7 +262,9 @@ class MusicService : Service() {
     fun shuffleTrackList() {
         trackList = trackList.shuffled()
         currentTrackIndex = 0
-        playTrack(trackList[currentTrackIndex])
+        if (!trackList.isEmpty()) {
+            playTrack(trackList[currentTrackIndex])
+        }
     }
 
     fun setTrackControlCallback(callback: TrackControlCallback) {
@@ -253,6 +273,7 @@ class MusicService : Service() {
 
     fun notifyPlaybackStateChanged(isPlaying: Boolean) {
         trackControlCallback?.onPlaybackStateChanged(isPlaying)
+        updatePlaybackState(isPlaying)
     }
 
     fun getAudioSessionId(): Int {
@@ -275,18 +296,27 @@ class MusicService : Service() {
     }
 
     private fun createNotification(): Notification {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "music_channel"
         val channelName = "Music Channel"
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
+            val channel =
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
             notificationManager.createNotificationChannel(channel)
         }
 
         val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
             .setMediaSession(mediaSession.sessionToken)
             .setShowActionsInCompactView(0, 1, 2)
+            .setShowCancelButton(true)
+            .setCancelButtonIntent(
+                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                    this,
+                    PlaybackStateCompat.ACTION_STOP
+                )
+            )
 
         val playPauseIntent = PendingIntent.getService(
             this,
@@ -333,8 +363,27 @@ class MusicService : Service() {
     }
 
     private fun updateNotification() {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val notification = createNotification()
         notificationManager.notify(1, notification)
+    }
+
+    private fun
+            updatePlaybackState(isPlaying: Boolean) {
+        val playbackState = PlaybackStateCompat.Builder()
+            .setState(
+                if (isPlaying) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
+                exoPlayer.currentPosition,
+                1.0f
+            )
+            .setActions(
+                PlaybackStateCompat.ACTION_PLAY_PAUSE or
+                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
+                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+                        PlaybackStateCompat.ACTION_SEEK_TO
+            )
+            .build()
+        mediaSession.setPlaybackState(playbackState)
     }
 }
