@@ -24,6 +24,7 @@ class PlaylistFragment : Fragment() {
     private val playlists = mutableListOf<Playlist>()
     private lateinit var playlistAdapter: PlaylistAdapter
     private lateinit var createPlaylistButton: ImageButton
+    private lateinit var backButton: ImageButton
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,6 +41,8 @@ class PlaylistFragment : Fragment() {
         playlistRecyclerView.layoutManager = GridLayoutManager(context, 2)
         playlistAdapter = PlaylistAdapter(playlists, this::onPlaylistClick)
         playlistRecyclerView.adapter = playlistAdapter
+        backButton = view.findViewById(R.id.backButton)
+        backButton.setOnClickListener { parentFragmentManager.popBackStack() }
         loadPlaylists()
         view.setOnClickListener {  }
     }

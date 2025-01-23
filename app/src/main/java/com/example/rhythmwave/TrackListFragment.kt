@@ -204,7 +204,15 @@ class TrackListFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onTrackChanged(track: Track) {
-        (activity as MainActivity).showTrackControl(track)
+        val fragmentManager = parentFragmentManager
+        val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
+        if (currentFragment !is PlayerFragment) {
+            (activity as MainActivity).showTrackControl(track)
+        }else{
+            val playerFragment =
+                parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+            playerFragment?.updateTrackInfo(track)
+        }
     }
 
     override fun onPlaybackStateChanged(isPlaying: Boolean) {

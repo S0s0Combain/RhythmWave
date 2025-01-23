@@ -28,6 +28,7 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
     private lateinit var trackControlLayout: ConstraintLayout
     private lateinit var randomButton: MaterialButton
     private lateinit var clearImageButton: ImageButton
+    private lateinit var backButton: ImageButton
 
     var musicService: MusicService? = null
     private var isBound = false
@@ -74,6 +75,8 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
         randomButton.setOnClickListener {
             shuffleTracks()
         }
+        backButton = view.findViewById(R.id.backButton)
+        backButton.setOnClickListener { parentFragmentManager.popBackStack() }
         favoriteRecyclerView.adapter = favoriteTrackAdapter
         context?.bindService(
             Intent(context, MusicService::class.java),
@@ -152,7 +155,15 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onTrackChanged(track: Track) {
-        (activity as MainActivity).showTrackControl(track)
+        val fragmentManager = parentFragmentManager
+        val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
+        if (currentFragment !is PlayerFragment) {
+            (activity as MainActivity).showTrackControl(track)
+        }else{
+            val playerFragment =
+                parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+            playerFragment?.updateTrackInfo(track)
+        }
     }
 
     override fun onPlaybackStateChanged(isPlaying: Boolean) {
@@ -162,12 +173,14 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
             pauseButton.setImageResource(R.drawable.baseline_play_arrow_24)
         }
 
-        val playerFragment =
-            parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
-        playerFragment?.updateSeekbar(
-            musicService?.getCurrentPosition() ?: 0,
-            musicService?.getCurrentTrack()?.duration ?: 0
-        )
+        if (isAdded) {
+            val playerFragment =
+                parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+            playerFragment?.updateSeekbar(
+                musicService?.getCurrentPosition() ?: 0,
+                musicService?.getCurrentTrack()?.duration ?: 0
+            )
+        }
     }
 
     private fun openPlayerFragment(musicService: MusicService) {

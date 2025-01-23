@@ -29,6 +29,7 @@ class EditPlaylistFragment : Fragment() {
     private lateinit var saveButton: Button
     private var playlistId: Long? = null
     private var selectedImageUri: Uri? = null
+    private lateinit var backButton: ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +47,8 @@ class EditPlaylistFragment : Fragment() {
         playlistNameEditText = view.findViewById(R.id.editPlaylistName)
         playlistImageView = view.findViewById(R.id.playlistImageView)
         saveButton = view.findViewById(R.id.saveButton)
+        backButton = view.findViewById(R.id.backButton)
+        backButton.setOnClickListener { parentFragmentManager.popBackStack() }
 
         loadPlaylist()
 

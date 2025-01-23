@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.BitmapFactory
+import android.media.Image
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
@@ -41,6 +42,7 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
     private lateinit var editPlaylistButton: ImageButton
     private lateinit var pauseButton: ImageButton
     private lateinit var trackControlLayout: ConstraintLayout
+    private lateinit var backButton: ImageButton
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -85,6 +87,8 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
         editPlaylistButton.setOnClickListener { showContextMenu(it) }
         pauseButton = (activity as MainActivity).findViewById(R.id.pauseButton)
         playlistImage = view.findViewById(R.id.playlistImage)
+        backButton = view.findViewById(R.id.backButton)
+        backButton.setOnClickListener { parentFragmentManager.popBackStack() }
         trackAdapter = PlaylistTracksAdapter(
             onTrackClick = { track -> onTrackClick(track) },
             onShareClick = { track ->
@@ -257,8 +261,14 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onTrackChanged(track: Track) {
-        if (isAdded) {
+        val fragmentManager = parentFragmentManager
+        val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
+        if (currentFragment !is PlayerFragment) {
             (activity as MainActivity).showTrackControl(track)
+        }else{
+            val playerFragment =
+                parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+            playerFragment?.updateTrackInfo(track)
         }
     }
 

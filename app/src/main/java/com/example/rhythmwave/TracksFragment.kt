@@ -33,6 +33,7 @@ class TracksFragment : Fragment(), TrackControlCallback {
     private var artist: Artist? = null
     private lateinit var tracks: MutableList<Track>
     private lateinit var randomButton: MaterialButton
+    private lateinit var backButton: ImageButton
 
     var musicService: MusicService? = null
     private var isBound = false
@@ -65,6 +66,8 @@ class TracksFragment : Fragment(), TrackControlCallback {
         titleTextView = view.findViewById(R.id.titleTextView)
         titleTextView.setText(arguments?.getString("title"))
         randomButton = view.findViewById(R.id.randomButton)
+        backButton = view.findViewById(R.id.backButton)
+        backButton.setOnClickListener { parentFragmentManager.popBackStack() }
 
         album = arguments?.getParcelable("album")
         artist = arguments?.getParcelable("artist")
@@ -235,8 +238,14 @@ class TracksFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onTrackChanged(track: Track) {
-        if (isAdded) {
-            (requireActivity() as MainActivity).showTrackControl(track)
+        val fragmentManager = parentFragmentManager
+        val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
+        if (currentFragment !is PlayerFragment) {
+            (activity as MainActivity).showTrackControl(track)
+        }else{
+            val playerFragment =
+                parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+            playerFragment?.updateTrackInfo(track)
         }
     }
 

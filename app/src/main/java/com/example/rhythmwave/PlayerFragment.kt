@@ -63,7 +63,10 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         trackControlLayout = (activity as MainActivity).findViewById(R.id.trackControlLayout)
 
         buttonDown.setOnClickListener { collapseFragment() }
-        prevButton.setOnClickListener { musicService?.previousTrack() }
+        prevButton.setOnClickListener {
+            musicService?.previousTrack()
+            pauseButton.setImageResource(R.drawable.baseline_pause_circle_24)
+        }
         pauseButton.setOnClickListener {
             if (musicService?.isPlaying() == true) {
                 pauseButton.setImageResource(R.drawable.ic_play)
@@ -72,7 +75,10 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
             }
             musicService?.togglePlayPause()
         }
-        nextButton.setOnClickListener { musicService?.nextTrack() }
+        nextButton.setOnClickListener {
+            musicService?.nextTrack()
+            pauseButton.setImageResource(R.drawable.baseline_pause_circle_24)
+        }
         fragmentSeekBar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
@@ -92,9 +98,9 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         }
         buttonDown = view.findViewById(R.id.buttonDown)
         buttonDown.setOnClickListener { collapseFragment() }
-        if(musicService?.isPlaying() == true){
+        if (musicService?.isPlaying() == true) {
             pauseButton.setImageResource(R.drawable.baseline_pause_circle_24)
-        } else{
+        } else {
             pauseButton.setImageResource(R.drawable.ic_play)
         }
         return view

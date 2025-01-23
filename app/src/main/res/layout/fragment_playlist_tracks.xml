@@ -38,7 +38,6 @@
         android:background="@drawable/rounded_image_view"
         android:clipToOutline="true"
         android:scaleType="centerCrop"
-        android:src="@drawable/playlist_deafult"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/backButton" />

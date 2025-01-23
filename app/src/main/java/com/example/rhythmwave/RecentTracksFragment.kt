@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.media.Image
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
@@ -36,6 +37,7 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
     private lateinit var trackControlLayout: ConstraintLayout
     private lateinit var randomButton: MaterialButton
     private lateinit var clearImageButton: ImageButton
+    private lateinit var backButton: ImageButton
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -64,6 +66,8 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
         randomButton = view.findViewById(R.id.randomButton)
         clearImageButton = view.findViewById(R.id.clearImageButton)
         clearImageButton.setOnClickListener { showClearConfirmationDialog() }
+        backButton = view.findViewById(R.id.backButton)
+        backButton.setOnClickListener { parentFragmentManager.popBackStack() }
 
         trackAdapter = TrackAdapter(
             onTrackClick = { track ->
@@ -228,8 +232,14 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onTrackChanged(track: Track) {
-        if (isAdded) {
+        val fragmentManager = parentFragmentManager
+        val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
+        if (currentFragment !is PlayerFragment) {
             (activity as MainActivity).showTrackControl(track)
+        }else{
+            val playerFragment =
+                parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+            playerFragment?.updateTrackInfo(track)
         }
     }
 

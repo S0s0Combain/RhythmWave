@@ -7,6 +7,7 @@ import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.IBinder
+import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -31,6 +32,7 @@ class EqualizerActivity : AppCompatActivity() {
     private lateinit var frequency910HzTextView: TextView
     private lateinit var frequency3_6kHzTextView: TextView
     private lateinit var frequency14_0kHzTextView: TextView
+    private lateinit var backButton: ImageButton
 
     private lateinit var musicService: MusicService
     private var isBound = false
@@ -60,6 +62,8 @@ class EqualizerActivity : AppCompatActivity() {
         frequency910HzTextView = findViewById(R.id.frequency910HzTextView)
         frequency3_6kHzTextView = findViewById(R.id.frequency3_6kHzTextView)
         frequency14_0kHzTextView = findViewById(R.id.frequency14_0kHzTextView)
+        backButton = findViewById(R.id.backButton)
+        backButton.setOnClickListener { onBackPressed() }
 
         setSeekBarLimits(seekBarBass)
         setSeekBarLimits(seekBar60Hz)
