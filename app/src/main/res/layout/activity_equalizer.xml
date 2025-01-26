@@ -33,7 +33,7 @@
             android:gravity="center"
             android:text="Эквалайзер"
             android:textColor="@color/light_gray"
-            android:textSize="20sp" />/>
+            android:textSize="20sp" />
     </LinearLayout>
 
     <TextView
@@ -169,4 +169,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/frequency14_0kHzTextView" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/presetRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/seekBar14_0kHz" />
 </androidx.constraintlayout.widget.ConstraintLayout>

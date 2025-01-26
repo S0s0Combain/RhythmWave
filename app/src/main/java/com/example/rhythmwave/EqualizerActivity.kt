@@ -15,6 +15,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Orientation
 
 class EqualizerActivity : AppCompatActivity() {
     private lateinit var sharedPreferences: SharedPreferences
@@ -26,13 +29,15 @@ class EqualizerActivity : AppCompatActivity() {
     private lateinit var seekBar14_0kHz: SeekBar
 
     private lateinit var bassTextView: TextView
-    private lateinit var trebleTextView: TextView
     private lateinit var frequency60HzTextView: TextView
     private lateinit var frequency230HzTextView: TextView
     private lateinit var frequency910HzTextView: TextView
     private lateinit var frequency3_6kHzTextView: TextView
     private lateinit var frequency14_0kHzTextView: TextView
+
     private lateinit var backButton: ImageButton
+    private lateinit var presetRecyclerView: RecyclerView
+    private lateinit var presetAdapter: PresetAdapter
 
     private lateinit var musicService: MusicService
     private var isBound = false
@@ -80,6 +85,44 @@ class EqualizerActivity : AppCompatActivity() {
         setupSeekBarListener(seekBar910Hz, frequency910HzTextView, "910Hz")
         setupSeekBarListener(seekBar3_6kHz, frequency3_6kHzTextView, "3.6kHz")
         setupSeekBarListener(seekBar14_0kHz, frequency14_0kHzTextView, "14.0kHz")
+
+        presetRecyclerView = findViewById(R.id.presetRecyclerView)
+        presetRecyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        presetAdapter = PresetAdapter(getPresets()) { preset ->
+            applyPreset(preset)
+        }
+        presetRecyclerView.adapter = presetAdapter
+    }
+
+    private fun getPresets(): List<Preset> {
+        return listOf(
+            Preset("Рок", 70, 60, 50, 40, 30, 20),
+            Preset("Поп", 50, 40, 30, 20, 10, 0),
+            Preset("Классика", 30, 20, 10, 0, 10, 20),
+            Preset("Джаз", 40, 30, 20, 10, 0, 10),
+            Preset("Электроника", 80, 70, 60, 50, 40, 30),
+            Preset("Хип-хоп", 90, 80, 70, 60, 50, 40),
+            Preset("Акустика", 40, 30, 20, 10, 0, 10),
+            Preset("Танцевальная", 70, 60, 50, 40, 30, 20),
+            Preset("Вокал", 30, 20, 10, 0, 10, 20),
+            Preset("Плоский", 50, 50, 50, 50, 50, 50),
+            Preset("Усиление басов", 100, 90, 80, 70, 60, 50),
+            Preset("Усиление высоких частот", 30, 40, 50, 60, 70, 80),
+            Preset("Громкость", 60, 50, 40, 30, 20, 10)
+        )
+    }
+
+
+    private fun applyPreset(preset: Preset) {
+        seekBarBass.progress = preset.bass
+        seekBar60Hz.progress = preset.level60Hz
+        seekBar230Hz.progress = preset.level230Hz
+        seekBar910Hz.progress = preset.level910Hz
+        seekBar3_6kHz.progress = preset.level3_6kHz
+        seekBar14_0kHz.progress = preset.level14kHz
+        updateTextViews()
+        applyEqualizerSettings()
+        saveEqualizerSettings()
     }
 
     private fun loadEqualizerSettings() {
