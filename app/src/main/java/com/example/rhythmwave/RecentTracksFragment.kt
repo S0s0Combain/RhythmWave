@@ -67,7 +67,9 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
         clearImageButton = view.findViewById(R.id.clearImageButton)
         clearImageButton.setOnClickListener { showClearConfirmationDialog() }
         backButton = view.findViewById(R.id.backButton)
-        backButton.setOnClickListener { parentFragmentManager.popBackStack() }
+        backButton.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
 
         trackAdapter = TrackAdapter(
             onTrackClick = { track ->
@@ -165,7 +167,7 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
             MediaStore.Audio.Media.DURATION
         )
 
-        val cursor = requireContext().contentResolver.query(
+        val cursor = activity?.applicationContext?.contentResolver?.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             projection,
             "${MediaStore.Audio.Media._ID} = ?",
@@ -180,7 +182,13 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
                 val artist = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST))
                 val duration = it.getInt(it.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION))
 
-                return Track(title, artist, duration, id, getAlbumArt(requireContext(), id))
+                return Track(
+                    title,
+                    artist,
+                    duration,
+                    id,
+                    getAlbumArt(requireActivity().applicationContext, id)
+                )
             }
         }
         return null
@@ -232,14 +240,16 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onTrackChanged(track: Track) {
-        val fragmentManager = parentFragmentManager
-        val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
-        if (currentFragment !is PlayerFragment) {
-            (activity as MainActivity).showTrackControl(track)
-        }else{
-            val playerFragment =
-                parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
-            playerFragment?.updateTrackInfo(track)
+        if (isAdded) {
+            val fragmentManager = parentFragmentManager
+            val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
+            if (currentFragment !is PlayerFragment) {
+                (activity as MainActivity).showTrackControl(track)
+            } else {
+                val playerFragment =
+                    parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+                playerFragment?.updateTrackInfo(track)
+            }
         }
     }
 

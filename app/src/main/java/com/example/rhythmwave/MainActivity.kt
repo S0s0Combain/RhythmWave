@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
             searchFragment.setTrackList(MusicService.getInstance()?.getTrackList() ?: listOf())
             supportFragmentManager.beginTransaction()
                 .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
-                .replace(R.id.fragmentContainer, searchFragment).addToBackStack(null).commit()
+                .add(R.id.fragmentContainer, searchFragment).addToBackStack(null).commit()
             trackControlLayout.visibility = View.GONE
         }
         equalizerImageButton.setOnClickListener { createEqualizerActivity() }
@@ -150,7 +150,6 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
     private fun replaceFragment(containerId: Int, fragment: Fragment) {
         supportFragmentManager.beginTransaction().replace(containerId, fragment)
             .addToBackStack(null).commit()
-        trackControlLayout.visibility = View.GONE
     }
 
     private class ViewPagerAdapter(fa: AppCompatActivity) : FragmentStateAdapter(fa) {

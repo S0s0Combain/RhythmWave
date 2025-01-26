@@ -204,11 +204,12 @@ class TrackListFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onTrackChanged(track: Track) {
+        trackAdapter.updateCurrentTrack(track)
         val fragmentManager = parentFragmentManager
         val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
         if (currentFragment !is PlayerFragment) {
             (activity as MainActivity).showTrackControl(track)
-        }else{
+        } else {
             val playerFragment =
                 parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
             playerFragment?.updateTrackInfo(track)
@@ -216,12 +217,12 @@ class TrackListFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onPlaybackStateChanged(isPlaying: Boolean) {
+        trackAdapter.updateCurrentTrack(musicService?.getCurrentTrack())
         if (isPlaying) {
             pauseButton.setImageResource(R.drawable.baseline_pause_24)
         } else {
             pauseButton.setImageResource(R.drawable.baseline_play_arrow_24)
         }
-
         val playerFragment =
             parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
         playerFragment?.updateSeekbar(
@@ -252,7 +253,7 @@ class TrackListFragment : Fragment(), TrackControlCallback {
         }
         requireActivity().supportFragmentManager.beginTransaction()
             .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
-            .replace(R.id.fragmentContainer, playerFragment)
+            .add(R.id.fragmentContainer, playerFragment)
             .addToBackStack(null)
             .commit()
     }

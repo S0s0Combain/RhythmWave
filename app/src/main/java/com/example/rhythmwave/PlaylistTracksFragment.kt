@@ -43,6 +43,7 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
     private lateinit var pauseButton: ImageButton
     private lateinit var trackControlLayout: ConstraintLayout
     private lateinit var backButton: ImageButton
+    private lateinit var playPlaylistButton: ImageButton
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -89,6 +90,12 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
         playlistImage = view.findViewById(R.id.playlistImage)
         backButton = view.findViewById(R.id.backButton)
         backButton.setOnClickListener { parentFragmentManager.popBackStack() }
+        playPlaylistButton = view.findViewById(R.id.playPlaylistButton)
+        playPlaylistButton.setOnClickListener {
+            if (tracks.isNotEmpty()) {
+                onTrackClick(tracks[0])
+            }
+        }
         trackAdapter = PlaylistTracksAdapter(
             onTrackClick = { track -> onTrackClick(track) },
             onShareClick = { track ->
@@ -261,14 +268,16 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onTrackChanged(track: Track) {
-        val fragmentManager = parentFragmentManager
-        val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
-        if (currentFragment !is PlayerFragment) {
-            (activity as MainActivity).showTrackControl(track)
-        }else{
-            val playerFragment =
-                parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
-            playerFragment?.updateTrackInfo(track)
+        if (isAdded) {
+            val fragmentManager = parentFragmentManager
+            val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
+            if (currentFragment !is PlayerFragment) {
+                (activity as MainActivity).showTrackControl(track)
+            } else {
+                val playerFragment =
+                    parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+                playerFragment?.updateTrackInfo(track)
+            }
         }
     }
 

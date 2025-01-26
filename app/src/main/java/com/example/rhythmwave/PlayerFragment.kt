@@ -166,8 +166,10 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
             }
 
             override fun onAnimationEnd(animation: Animation?) {
-                requireActivity().supportFragmentManager.popBackStack()
-                view?.visibility = View.GONE
+                if (isAdded) {
+                    requireActivity().supportFragmentManager.popBackStack()
+                    view?.visibility = View.GONE
+                }
             }
 
             override fun onAnimationRepeat(animation: Animation?) {}

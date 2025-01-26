@@ -76,7 +76,9 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
             shuffleTracks()
         }
         backButton = view.findViewById(R.id.backButton)
-        backButton.setOnClickListener { parentFragmentManager.popBackStack() }
+        backButton.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
         favoriteRecyclerView.adapter = favoriteTrackAdapter
         context?.bindService(
             Intent(context, MusicService::class.java),
@@ -155,14 +157,16 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onTrackChanged(track: Track) {
-        val fragmentManager = parentFragmentManager
-        val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
-        if (currentFragment !is PlayerFragment) {
-            (activity as MainActivity).showTrackControl(track)
-        }else{
-            val playerFragment =
-                parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
-            playerFragment?.updateTrackInfo(track)
+        if (isAdded) {
+            val fragmentManager = parentFragmentManager
+            val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
+            if (currentFragment !is PlayerFragment) {
+                (activity as MainActivity).showTrackControl(track)
+            } else {
+                val playerFragment =
+                    parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
+                playerFragment?.updateTrackInfo(track)
+            }
         }
     }
 
