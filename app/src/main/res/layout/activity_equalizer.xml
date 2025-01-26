@@ -170,6 +170,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/frequency14_0kHzTextView" />
 
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/volumeSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Объемный звук"
+        android:textColor="@color/light_gray"
+        android:textSize="18sp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/seekBar14_0kHz"
+        app:thumbTint="@color/accent_color_blue"
+        app:trackTint="@color/light_gray2"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/presetRecyclerView"
         android:layout_width="0dp"
@@ -177,5 +191,5 @@
         android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/seekBar14_0kHz" />
+        app:layout_constraintTop_toBottomOf="@id/volumeSwitch" />
 </androidx.constraintlayout.widget.ConstraintLayout>

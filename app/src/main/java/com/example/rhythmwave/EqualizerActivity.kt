@@ -12,6 +12,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -38,6 +39,7 @@ class EqualizerActivity : AppCompatActivity() {
     private lateinit var backButton: ImageButton
     private lateinit var presetRecyclerView: RecyclerView
     private lateinit var presetAdapter: PresetAdapter
+    private lateinit var volumeSwitch: SwitchCompat
 
     private lateinit var musicService: MusicService
     private var isBound = false
@@ -67,6 +69,7 @@ class EqualizerActivity : AppCompatActivity() {
         frequency910HzTextView = findViewById(R.id.frequency910HzTextView)
         frequency3_6kHzTextView = findViewById(R.id.frequency3_6kHzTextView)
         frequency14_0kHzTextView = findViewById(R.id.frequency14_0kHzTextView)
+        volumeSwitch = findViewById(R.id.volumeSwitch)
         backButton = findViewById(R.id.backButton)
         backButton.setOnClickListener { onBackPressed() }
 
@@ -85,6 +88,14 @@ class EqualizerActivity : AppCompatActivity() {
         setupSeekBarListener(seekBar910Hz, frequency910HzTextView, "910Hz")
         setupSeekBarListener(seekBar3_6kHz, frequency3_6kHzTextView, "3.6kHz")
         setupSeekBarListener(seekBar14_0kHz, frequency14_0kHzTextView, "14.0kHz")
+        volumeSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (isBound) {
+                musicService.setVirtualizerEnabled(isChecked)
+                saveVirtualizerSetting(isChecked)
+            }
+        }
+
+        volumeSwitch.isChecked = loadVirtualizerSetting()
 
         presetRecyclerView = findViewById(R.id.presetRecyclerView)
         presetRecyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
@@ -157,6 +168,16 @@ class EqualizerActivity : AppCompatActivity() {
                 level14kHz = seekBar14_0kHz.progress
             )
         }
+    }
+
+    private fun loadVirtualizerSetting(): Boolean {
+        return sharedPreferences.getBoolean("VirtualizerEnabled", false)
+    }
+
+    private fun saveVirtualizerSetting(enabled: Boolean) {
+        val editor = sharedPreferences.edit()
+        editor.putBoolean("VirtualizerEnabled", enabled)
+        editor.apply()
     }
 
     private fun setupSeekBarListener(seekBar: SeekBar, textView: TextView, settingKey: String) {

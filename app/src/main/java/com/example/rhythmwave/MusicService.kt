@@ -11,6 +11,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
+import android.media.audiofx.Virtualizer
 import android.net.Uri
 import android.os.Binder
 import android.os.Build
@@ -40,6 +41,7 @@ class MusicService : Service() {
     private var currentTrackIndex: Int = 0
     private var trackControlCallback: TrackControlCallback? = null
     private lateinit var equalizer: Equalizer
+    private lateinit var virtualizer: Virtualizer
     private var trackAdapter: TrackAdapter? = null
     private var favoriteTrackAdapter: FavoriteTrackAdapter? = null
     private var playlistTrackAdapter: PlaylistTracksAdapter? = null
@@ -69,6 +71,7 @@ class MusicService : Service() {
         exoPlayer = SimpleExoPlayer.Builder(this).build()
         equalizer = Equalizer(0, getAudioSessionId())
         equalizer.enabled = true
+        virtualizer = Virtualizer(0, getAudioSessionId())
 
         mediaSession = MediaSessionCompat(this, "MusicService")
         mediaSessionCallback = object : MediaSessionCompat.Callback() {
@@ -114,6 +117,10 @@ class MusicService : Service() {
         })
     }
 
+    fun setVirtualizerEnabled(enabled: Boolean) {
+        virtualizer.enabled = enabled
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.action?.let { action ->
             when (action) {
@@ -147,6 +154,7 @@ class MusicService : Service() {
             val bassBoost = BassBoost(0, getAudioSessionId())
             bassBoost.setEnabled(true)
             bassBoost.setStrength((bassLevel * 10).toShort())
+
 
             equalizer.setEnabled(true)
         }

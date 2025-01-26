@@ -124,6 +124,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
             isBound = true
 
             applyEqualizerSettings()
+            applyVirtualizerSetting()
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -255,5 +256,11 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
             frequency3_6kHz,
             frequency14_0kHz
         )
+    }
+
+    private fun applyVirtualizerSetting() {
+        val sharedPreferences = getSharedPreferences("EqualizerSettings", MODE_PRIVATE)
+        val virtualizerEnabled = sharedPreferences.getBoolean("VirtualizerEnabled", false)
+        musicService?.setVirtualizerEnabled(virtualizerEnabled)
     }
 }
