@@ -204,6 +204,7 @@ class TrackListFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onTrackChanged(track: Track) {
+        Log.d("MyLog", "Метод onTrackChanged вызван")
         trackAdapter.updateCurrentTrack(track)
         val fragmentManager = parentFragmentManager
         val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
@@ -217,6 +218,7 @@ class TrackListFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onPlaybackStateChanged(isPlaying: Boolean) {
+        Log.d("MyLog", "Метод onPlaybackStateChanged вызван")
         trackAdapter.updateCurrentTrack(musicService?.getCurrentTrack())
         if (isPlaying) {
             pauseButton.setImageResource(R.drawable.baseline_pause_24)
@@ -256,5 +258,10 @@ class TrackListFragment : Fragment(), TrackControlCallback {
             .add(R.id.fragmentContainer, playerFragment)
             .addToBackStack(null)
             .commit()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("MyLog", "onResume")
     }
 }

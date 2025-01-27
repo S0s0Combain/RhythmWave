@@ -42,7 +42,6 @@ class TracksFragment : Fragment(), TrackControlCallback {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             musicService = (service as MusicService.MusicServiceBinder).getService()
             isBound = true
-            musicService?.setTrackControlCallback(this@TracksFragment)
             musicService?.setTrackAdapter(trackAdapter)
             loadTracks()
         }

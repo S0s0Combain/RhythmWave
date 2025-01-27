@@ -50,7 +50,6 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
             val binder = service as MusicService.MusicServiceBinder
             musicService = binder.getService()
             isBound = true
-            musicService?.setTrackControlCallback(this@PlaylistTracksFragment)
             musicService?.setPlaylistTrackAdapter(trackAdapter)
             loadTracks()
         }
@@ -268,6 +267,7 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onTrackChanged(track: Track) {
+        Log.d("MyLog", "onTrackChanged")
         if (isAdded) {
             val fragmentManager = parentFragmentManager
             val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
@@ -282,6 +282,7 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onPlaybackStateChanged(isPlaying: Boolean) {
+        Log.d("MyLog", "onPlaybackStateChanged")
         if (isPlaying) {
             pauseButton.setImageResource(R.drawable.baseline_pause_24)
         } else {
@@ -325,7 +326,7 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
             }
         }
         parentFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, fragment)
+            .add(R.id.fragmentContainer, fragment)
             .addToBackStack(null)
             .commit()
     }

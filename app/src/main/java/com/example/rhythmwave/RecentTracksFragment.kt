@@ -43,7 +43,6 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             musicService = (service as MusicService.MusicServiceBinder).getService()
             isBound = true
-            musicService?.setTrackControlCallback(this@RecentTracksFragment)
             musicService?.setTrackAdapter(trackAdapter)
             loadRecentTracks()
         }
@@ -147,7 +146,7 @@ class RecentTracksFragment : Fragment(), TrackControlCallback {
                     tracks.add(track)
                 } else {
                     CoroutineScope(Dispatchers.IO).launch {
-                        AppDatabase.getDatabase(requireContext()).recentTrackDao()
+                        AppDatabase.getDatabase(requireActivity().applicationContext).recentTrackDao()
                             .deleteByTrackId(recentTrack.trackId)
                     }
                 }

@@ -22,6 +22,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -45,6 +46,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
     private lateinit var recentTracksCardView: CardView
     private var musicService: MusicService? = null
     private var isBound = false
+    private lateinit var viewPager: ViewPager2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +59,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
         }
         window.navigationBarColor = ContextCompat.getColor(this, R.color.primary_background)
         val tabLayout: TabLayout = findViewById(R.id.tabLayout)
-        val viewPager: ViewPager2 = findViewById(R.id.viewPager)
+        viewPager = findViewById(R.id.viewPager)
         searchEditText = findViewById(R.id.searchEditText)
         fragmentContainer = findViewById(R.id.fragmentContainer)
         equalizerImageButton = findViewById(R.id.equalizerImageButton)
@@ -238,7 +240,6 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
             super.onBackPressed()
         }
     }
-
 
     private fun applyEqualizerSettings() {
         val sharedPreferences = getSharedPreferences("EqualizerSettings", MODE_PRIVATE)
