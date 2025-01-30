@@ -20,7 +20,6 @@ import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
-import com.yalantis.waves.util.Horizon
 
 class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     private lateinit var buttonDown: ImageButton

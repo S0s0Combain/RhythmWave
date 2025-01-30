@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
@@ -26,6 +27,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.io.ByteArrayOutputStream
 
 class SearchFragment : Fragment(), TrackControlCallback {
     private lateinit var searchEditText: EditText
@@ -33,7 +35,7 @@ class SearchFragment : Fragment(), TrackControlCallback {
     private lateinit var searchAdapter: TrackAdapter
     private lateinit var noResultsTextView: TextView
     private lateinit var downloadButton: Button
-    private lateinit var trackList: List<Track>
+    private lateinit var trackList: MutableList<Track>
     private lateinit var pauseButton: ImageButton
 
     var musicService: MusicService? = null
@@ -120,6 +122,7 @@ class SearchFragment : Fragment(), TrackControlCallback {
             serviceConnection,
             Context.BIND_AUTO_CREATE
         )
+        loadTracks()
     }
 
     override fun onDestroyView() {
@@ -183,8 +186,47 @@ class SearchFragment : Fragment(), TrackControlCallback {
         const val REQUEST_CODE_SPEECH_INPUT = 100
     }
 
-    fun setTrackList(tracks: List<Track>) {
-        this.trackList = tracks
+    private fun loadTracks() {
+        val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0"
+        val projection = arrayOf(
+            MediaStore.Audio.Media.TITLE,
+            MediaStore.Audio.Media.ARTIST,
+            MediaStore.Audio.Media.DURATION,
+            MediaStore.Audio.Media._ID,
+            MediaStore.Audio.Media.MIME_TYPE
+        )
+        val cursor: Cursor? = context?.contentResolver?.query(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            projection,
+            selection,
+            null,
+            null
+        )
+
+        trackList = mutableListOf()
+        cursor?.use {
+            if (it.moveToFirst()) {
+                do {
+                    val title =
+                        cursor.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE))
+                    val artist =
+                        cursor.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST))
+                    val duration =
+                        cursor.getInt(it.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION))
+                    val id = cursor.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
+                    val mimeType =
+                        cursor.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE))
+
+                    if (duration < 30000 || mimeType != "audio/mpeg") {
+                        continue
+                    }
+
+                    val albumArt = getAlbumArt(requireContext(), id)
+                    trackList.add(Track(title, artist, duration, id, albumArt))
+                } while (it.moveToNext())
+            }
+        }
+        musicService?.setTrackList(trackList) // Устанавливаем полный список в MusicService
     }
 
     private fun onTrackClick(track: Track) {
@@ -261,5 +303,34 @@ class SearchFragment : Fragment(), TrackControlCallback {
             .add(R.id.fragmentContainer, playerFragment)
             .addToBackStack(null)
             .commit()
+    }
+
+    private fun getAlbumArt(context: Context, trackId: Long): ByteArray? {
+        val uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        val selection = "${MediaStore.Audio.Media._ID} = ?"
+        val selectionArgs = arrayOf(trackId.toString())
+        val projection = arrayOf(MediaStore.Audio.Media.ALBUM_ID)
+
+        var albumId: Long? = null
+        context.contentResolver.query(uri, projection, selection, selectionArgs, null)
+            ?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    albumId =
+                        cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
+                }
+            }
+
+        if (albumId != null) {
+            val albumArtUri: Uri = Uri.parse("content://media/external/audio/albumart/$albumId")
+            return try {
+                val inputStream = context.contentResolver.openInputStream(albumArtUri)
+                val byteArrayOutputStream = ByteArrayOutputStream()
+                inputStream?.copyTo(byteArrayOutputStream)
+                byteArrayOutputStream.toByteArray()
+            } catch (e: Exception) {
+                null
+            }
+        }
+        return null
     }
 }

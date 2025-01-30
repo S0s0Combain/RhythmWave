@@ -86,7 +86,6 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
 
         searchEditText.setOnClickListener {
             val searchFragment = SearchFragment()
-            searchFragment.setTrackList(MusicService.getInstance()?.getTrackList() ?: listOf())
             supportFragmentManager.beginTransaction()
                 .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
                 .add(R.id.fragmentContainer, searchFragment).addToBackStack(null).commit()

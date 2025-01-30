@@ -15,6 +15,7 @@
         android:drawableEnd="@drawable/baseline_mic_24"
         android:hint="@string/search"
         android:padding="8dp"
+        android:backgroundTint="@color/light_gray"
         android:textColor="@color/light_gray"
         android:textColorHint="@color/light_gray2"
         app:layout_constraintEnd_toEndOf="parent"
