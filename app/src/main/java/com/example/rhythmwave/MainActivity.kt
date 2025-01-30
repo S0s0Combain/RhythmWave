@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
     private var musicService: MusicService? = null
     private var isBound = false
     private lateinit var viewPager: ViewPager2
+    private var isTrackControlVisible = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,6 +90,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
             supportFragmentManager.beginTransaction()
                 .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
                 .add(R.id.fragmentContainer, searchFragment).addToBackStack(null).commit()
+            isTrackControlVisible = (trackControlLayout.visibility == View.VISIBLE)
             trackControlLayout.visibility = View.GONE
         }
         equalizerImageButton.setOnClickListener { createEqualizerActivity() }
@@ -232,6 +234,11 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
         if (fragmentManager.backStackEntryCount > 0) {
             if (currentFragment is PlayerFragment) {
                 currentFragment.collapseFragment()
+            } else if (currentFragment is SearchFragment) {
+                if (isTrackControlVisible) {
+                    trackControlLayout.visibility = View.VISIBLE
+                }
+                fragmentManager.popBackStack()
             } else {
                 fragmentManager.popBackStack()
             }
