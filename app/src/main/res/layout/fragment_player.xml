@@ -26,8 +26,8 @@
             app:tint="@color/light_gray" />
     </LinearLayout>
 
-    <android.opengl.GLSurfaceView
-        android:id="@+id/visualizationView"
+    <com.example.rhythmwave.AudioVisualizer
+        android:id="@+id/audioVisualizer"
         android:layout_width="match_parent"
         android:layout_height="300dp"
         app:layout_constraintBottom_toTopOf="@id/titleTextView"

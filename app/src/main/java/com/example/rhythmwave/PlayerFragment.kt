@@ -32,9 +32,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     private lateinit var fragmentSeekBar: SeekBar
     private lateinit var gestureDetector: GestureDetector
     private lateinit var trackControlLayout: ConstraintLayout
-    private lateinit var visualizationView: GLSurfaceView
-    private lateinit var horizon: Horizon
-    private lateinit var visualizer: Visualizer
+    private lateinit var audioVisualizer: AudioVisualizer
     var musicService: MusicService? = null
     private val handler = Handler(Looper.getMainLooper())
     private val updateSeekBarRunnable = object : Runnable {
@@ -59,8 +57,8 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         pauseButton = view.findViewById(R.id.pauseButton)
         nextButton = view.findViewById(R.id.nextButton)
         fragmentSeekBar = view.findViewById(R.id.fragmentSeekBar)
-        visualizationView = view.findViewById(R.id.visualizationView)
         trackControlLayout = (activity as MainActivity).findViewById(R.id.trackControlLayout)
+        audioVisualizer = view.findViewById(R.id.audioVisualizer)
 
         buttonDown.setOnClickListener { collapseFragment() }
         prevButton.setOnClickListener {
@@ -113,37 +111,13 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
             updateTrackInfo(currentTrack)
             updateSeekbar(musicService?.getCurrentPosition() ?: 0, currentTrack.duration)
         }
-
-        visualizationView = view.findViewById(R.id.visualizationView)
-
-        horizon = Horizon(
-            visualizationView,
-            resources.getColor(R.color.primary_background),
-            Visualizer.getMaxCaptureRate(),
-            1,
-            16
-        )
-
-        visualizer = Visualizer(musicService?.getAudioSessionId() ?: 0)
-        visualizer.captureSize = Visualizer.getCaptureSizeRange()[1]
-        visualizer.setDataCaptureListener(object : Visualizer.OnDataCaptureListener {
-            override fun onWaveFormDataCapture(
-                visualizer: Visualizer?,
-                bytes: ByteArray?,
-                samplingRate: Int
-            ) {
-//                bytes?.let { horizon.updateView(bytes) }
-            }
-
-            override fun onFftDataCapture(
-                visualizer: Visualizer?,
-                bytes: ByteArray?,
-                samplingRate: Int
-            ) {
-                bytes?.let { horizon.updateView(bytes) }
-            }
-        }, Visualizer.getMaxCaptureRate(), true, true)
-        visualizer.enabled = true
+        if (currentTrack != null) {
+            updateTrackInfo(currentTrack)
+            updateSeekbar(musicService?.getCurrentPosition() ?: 0, currentTrack.duration)
+        }
+        musicService?.let { service ->
+            audioVisualizer.getPathMedia(service.getExoPlayer()) // Connect the visualizer to the MediaPlayer
+        }
     }
 
     override fun onResume() {
@@ -223,10 +197,5 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     fun updateSeekbar(position: Int, duration: Int) {
         fragmentSeekBar.max = duration
         fragmentSeekBar.progress = position
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        visualizer?.release()
     }
 }

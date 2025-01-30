@@ -121,6 +121,10 @@ class MusicService : Service() {
         virtualizer.enabled = enabled
     }
 
+    fun getExoPlayer(): ExoPlayer {
+        return exoPlayer
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.action?.let { action ->
             when (action) {
