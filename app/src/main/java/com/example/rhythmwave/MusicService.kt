@@ -19,6 +19,7 @@ import android.os.IBinder
 import android.provider.MediaStore
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.media.session.MediaButtonReceiver
@@ -33,6 +34,8 @@ import com.google.android.exoplayer2.util.Util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Date
+import kotlin.random.Random
 
 class MusicService : Service() {
     private lateinit var exoPlayer: ExoPlayer
@@ -69,9 +72,9 @@ class MusicService : Service() {
         super.onCreate()
         instance = this
         exoPlayer = SimpleExoPlayer.Builder(this).build()
-        equalizer = Equalizer(0, getAudioSessionId())
+        equalizer = Equalizer(100, getAudioSessionId())
         equalizer.enabled = true
-        virtualizer = Virtualizer(0, getAudioSessionId())
+        virtualizer = Virtualizer(100, getAudioSessionId())
 
         mediaSession = MediaSessionCompat(this, "MusicService")
         mediaSessionCallback = object : MediaSessionCompat.Callback() {
@@ -119,6 +122,9 @@ class MusicService : Service() {
 
     fun setVirtualizerEnabled(enabled: Boolean) {
         virtualizer.enabled = enabled
+        virtualizer.forceVirtualizationMode(Virtualizer.VIRTUALIZATION_MODE_AUTO)
+        val strength = Random(Date().time).nextInt(1000)
+        virtualizer.setStrength(500)
     }
 
     fun getExoPlayer(): ExoPlayer {
@@ -155,10 +161,9 @@ class MusicService : Service() {
             equalizer.setBandLevel(3, (level3_6kHz * 10).toShort()) // 3.6kHz
             equalizer.setBandLevel(4, (level14kHz * 10).toShort()) // 14.0kHz
 
-            val bassBoost = BassBoost(0, getAudioSessionId())
+            val bassBoost = BassBoost(100, getAudioSessionId())
             bassBoost.setEnabled(true)
             bassBoost.setStrength((bassLevel * 10).toShort())
-
 
             equalizer.setEnabled(true)
         }
@@ -272,9 +277,11 @@ class MusicService : Service() {
     }
 
     fun shuffleTrackList() {
+        Log.d("MyLog", "Function vizvana")
         trackList = trackList.shuffled()
         currentTrackIndex = 0
-        if (!trackList.isEmpty()) {
+        if (trackList.isNotEmpty()) {
+            Log.d("MyLog", "Ne empty")
             playTrack(trackList[currentTrackIndex])
         }
     }
