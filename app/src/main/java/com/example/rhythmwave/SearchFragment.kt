@@ -46,7 +46,6 @@ class SearchFragment : Fragment(), TrackControlCallback {
             val binder = service as MusicService.MusicServiceBinder
             musicService = binder.getService()
             isBound = true
-            musicService?.setTrackControlCallback(this@SearchFragment)
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
