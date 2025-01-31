@@ -109,8 +109,8 @@ class TracksFragment : Fragment(), TrackControlCallback {
                     it.albumArt
                 )
             })
-            musicService?.shuffleTrackList()
         }
+        musicService?.shuffleTrackList()
     }
 
     private fun onTrackClick(track: Track) {

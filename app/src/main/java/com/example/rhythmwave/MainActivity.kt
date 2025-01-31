@@ -214,16 +214,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
                 supportFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
             playerFragment?.updateTrackInfo(track)
 
-            val main = findViewById<ConstraintLayout>(R.id.main)
-            val constraintSet = ConstraintSet()
-            constraintSet.clone(main)
-            constraintSet.connect(
-                R.id.fragmentContainer,
-                ConstraintSet.BOTTOM,
-                R.id.trackControlLayout,
-                ConstraintSet.TOP
-            )
-            constraintSet.applyTo(main)
+
         }
     }
 
