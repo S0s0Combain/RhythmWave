@@ -85,6 +85,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
         }.attach()
 
         searchEditText.setOnClickListener {
+            searchEditText.isEnabled = false
             val searchFragment = SearchFragment()
             supportFragmentManager.beginTransaction()
                 .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
@@ -227,6 +228,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
                     trackControlLayout.visibility = View.VISIBLE
                 }
                 fragmentManager.popBackStack()
+                searchEditText.isEnabled = true
             } else {
                 fragmentManager.popBackStack()
             }
