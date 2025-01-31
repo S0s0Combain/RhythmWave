@@ -115,7 +115,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
             updateSeekbar(musicService?.getCurrentPosition() ?: 0, currentTrack.duration)
         }
         musicService?.let { service ->
-            audioVisualizer.getPathMedia(service.getExoPlayer()) // Connect the visualizer to the MediaPlayer
+            audioVisualizer.getPathMedia(service.getExoPlayer())
         }
     }
 

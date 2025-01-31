@@ -104,8 +104,8 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
                     it.albumArt
                 )
             })
-            musicService?.shuffleTrackList()
         }
+        musicService?.shuffleTrackList()
     }
 
     private fun loadFavoriteTracks() {

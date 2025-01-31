@@ -7,7 +7,6 @@ import android.content.ServiceConnection
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.FrameLayout
@@ -177,7 +176,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
     override fun onTrackChanged(track: Track) {
         val fragmentManager = supportFragmentManager
         val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
-        if (currentFragment !is PlayerFragment) {
+        if ((currentFragment !is PlayerFragment)) {
             showTrackControl(track)
         }
     }
@@ -213,8 +212,6 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
             val playerFragment =
                 supportFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
             playerFragment?.updateTrackInfo(track)
-
-
         }
     }
 

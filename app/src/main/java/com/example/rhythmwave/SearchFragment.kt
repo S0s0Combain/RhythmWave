@@ -226,7 +226,7 @@ class SearchFragment : Fragment(), TrackControlCallback {
                 } while (it.moveToNext())
             }
         }
-        musicService?.setTrackList(trackList) // Устанавливаем полный список в MusicService
+        musicService?.setTrackList(trackList)
     }
 
     private fun onTrackClick(track: Track) {
@@ -250,12 +250,10 @@ class SearchFragment : Fragment(), TrackControlCallback {
 
     override fun onTrackChanged(track: Track) {
         searchAdapter.updateCurrentTrack(track)
-        if(isAdded) {
+        if (isAdded) {
             val fragmentManager = parentFragmentManager
             val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
-            if (currentFragment !is PlayerFragment) {
-                (activity as MainActivity).showTrackControl(track)
-            } else {
+            if (currentFragment is PlayerFragment) {
                 val playerFragment =
                     parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
                 playerFragment?.updateTrackInfo(track)
