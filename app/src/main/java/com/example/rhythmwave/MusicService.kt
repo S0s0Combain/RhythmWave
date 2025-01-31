@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.AudioManager
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
 import android.media.audiofx.Virtualizer
@@ -52,6 +53,8 @@ class MusicService : Service() {
     private var updatePlaylistAdapter: Boolean = false
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var mediaSessionCallback: MediaSessionCompat.Callback
+    private lateinit var audioManager: AudioManager
+    private var audioFocusRequest: AudioManager.OnAudioFocusChangeListener? = null
 
     private val binder = MusicServiceBinder()
 
@@ -75,6 +78,7 @@ class MusicService : Service() {
         equalizer = Equalizer(100, getAudioSessionId())
         equalizer.enabled = true
         virtualizer = Virtualizer(100, getAudioSessionId())
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         mediaSession = MediaSessionCompat(this, "MusicService")
         mediaSessionCallback = object : MediaSessionCompat.Callback() {
@@ -118,6 +122,24 @@ class MusicService : Service() {
                 }
             }
         })
+
+        audioFocusRequest = AudioManager.OnAudioFocusChangeListener { focusChange ->
+            when (focusChange) {
+                AudioManager.AUDIOFOCUS_LOSS -> {
+                    pauseTrack()
+                }
+                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                    pauseTrack()
+                }
+                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                    // Optionally, you can duck the audio here
+                    pauseTrack()
+                }
+                AudioManager.AUDIOFOCUS_GAIN -> {
+                    resumeTrack()
+                }
+            }
+        }
     }
 
     fun setVirtualizerEnabled(enabled: Boolean) {
@@ -201,6 +223,7 @@ class MusicService : Service() {
         }
         notifyPlaybackStateChanged(true)
         updateNotification()
+        requestAudioFocus()
     }
 
     fun setTrackAdapter(trackAdapter: TrackAdapter) {
@@ -225,18 +248,22 @@ class MusicService : Service() {
         exoPlayer.playWhenReady = false
         notifyPlaybackStateChanged(false)
         updateNotification()
+        abandonAudioFocus()
     }
 
     fun resumeTrack() {
         exoPlayer.playWhenReady = true
         notifyPlaybackStateChanged(true)
         updateNotification()
+        requestAudioFocus()
     }
 
     fun togglePlayPause() {
-        exoPlayer.playWhenReady = !exoPlayer.playWhenReady
-        notifyPlaybackStateChanged(exoPlayer.playWhenReady)
-        updateNotification()
+        if (exoPlayer.playWhenReady) {
+            pauseTrack()
+        } else {
+            resumeTrack()
+        }
     }
 
     fun previousTrack() {
@@ -312,6 +339,7 @@ class MusicService : Service() {
             equalizer.release()
         }
         exoPlayer.release()
+        abandonAudioFocus()
     }
 
     private fun createNotification(): Notification {
@@ -388,8 +416,7 @@ class MusicService : Service() {
         notificationManager.notify(1, notification)
     }
 
-    private fun
-            updatePlaybackState(isPlaying: Boolean) {
+    private fun updatePlaybackState(isPlaying: Boolean) {
         val playbackState = PlaybackStateCompat.Builder()
             .setState(
                 if (isPlaying) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
@@ -404,5 +431,20 @@ class MusicService : Service() {
             )
             .build()
         mediaSession.setPlaybackState(playbackState)
+    }
+
+    private fun requestAudioFocus() {
+        val result = audioManager.requestAudioFocus(
+            audioFocusRequest,
+            AudioManager.STREAM_MUSIC,
+            AudioManager.AUDIOFOCUS_GAIN
+        )
+        if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            pauseTrack()
+        }
+    }
+
+    private fun abandonAudioFocus() {
+        audioManager.abandonAudioFocus(audioFocusRequest)
     }
 }
