@@ -119,6 +119,14 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         }
     }
 
+    fun updatePlayPauseButton(isPlaying: Boolean) {
+        if (isPlaying) {
+            pauseButton.setImageResource(R.drawable.baseline_pause_circle_24)
+        } else {
+            pauseButton.setImageResource(R.drawable.ic_play)
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         handler.post(updateSeekBarRunnable)

@@ -226,6 +226,7 @@ class TrackListFragment : Fragment(), TrackControlCallback {
             musicService?.getCurrentPosition() ?: 0,
             musicService?.getCurrentTrack()?.duration ?: 0
         )
+        playerFragment?.updatePlayPauseButton(isPlaying)
     }
 
     private fun deleteTrack(track: Track) {

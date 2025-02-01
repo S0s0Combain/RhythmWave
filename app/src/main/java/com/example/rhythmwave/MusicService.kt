@@ -132,7 +132,6 @@ class MusicService : Service() {
                     pauseTrack()
                 }
                 AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
-                    // Optionally, you can duck the audio here
                     pauseTrack()
                 }
                 AudioManager.AUDIOFOCUS_GAIN -> {

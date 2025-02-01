@@ -195,6 +195,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
             MusicService.getInstance()?.getCurrentPosition() ?: 0,
             MusicService.getInstance()?.getCurrentTrack()?.duration ?: 0
         )
+        playerFragment?.updatePlayPauseButton(isPlaying)
     }
 
     fun showTrackControl(track: Track) {
