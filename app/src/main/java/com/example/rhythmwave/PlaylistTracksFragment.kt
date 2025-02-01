@@ -193,7 +193,7 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
                     trackAdapter.updateTracks(tracks)
                     view?.findViewById<TextView>(R.id.playlistNameTextView)?.text = playlist?.name
                     if (playlist?.image == null) {
-                        playlistImage.setImageResource(R.drawable.playlist_deafult)
+                        playlistImage.setImageResource(R.drawable.default_image)
                     } else {
                         playlistImage.setImageBitmap(playlist?.image?.let {
                             BitmapFactory.decodeByteArray(

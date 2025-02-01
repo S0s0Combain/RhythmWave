@@ -70,7 +70,7 @@ class EditPlaylistFragment : Fragment() {
                     playlist.image?.let {
                         val bitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
                         playlistImageView.setImageBitmap(bitmap)
-                    } ?: playlistImageView.setImageResource(R.drawable.playlist_deafult)
+                    } ?: playlistImageView.setImageResource(R.drawable.default_image)
                 }
             }
         }

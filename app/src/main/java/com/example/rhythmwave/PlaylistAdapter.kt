@@ -34,7 +34,7 @@ class PlaylistAdapter(
             val bitmap = BitmapFactory.decodeByteArray(playlist.image, 0, playlist.image.size)
             holder.playlistImageView.setImageBitmap(bitmap)
         } else {
-            holder.playlistImageView.setImageResource(R.drawable.playlist_deafult)
+            holder.playlistImageView.setImageResource(R.drawable.default_image)
         }
 
         holder.itemView.setOnClickListener { onPlaylistClick(playlist) }

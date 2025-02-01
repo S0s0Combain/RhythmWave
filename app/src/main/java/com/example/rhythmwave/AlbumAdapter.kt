@@ -55,7 +55,7 @@ class AlbumAdapter(
                     }
                 }
             } else {
-                albumImage.setImageResource(R.drawable.playlist_deafult)
+                albumImage.setImageResource(R.drawable.default_image)
             }
 
             itemView.setOnClickListener { onAlbumClick(album) }
