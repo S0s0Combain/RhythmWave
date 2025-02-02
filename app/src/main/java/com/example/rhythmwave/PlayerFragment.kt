@@ -1,6 +1,7 @@
 package com.example.rhythmwave
 
 import android.annotation.SuppressLint
+import android.graphics.BitmapFactory
 import android.media.audiofx.Visualizer
 import android.opengl.GLSurfaceView
 import android.os.Bundle
@@ -15,6 +16,7 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
@@ -34,6 +36,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     private lateinit var audioVisualizer: AudioVisualizer
     private lateinit var elapsedTimeTextView: TextView
     private lateinit var totalDurationTextView: TextView
+    private lateinit var trackImageView: ImageView
     var musicService: MusicService? = null
     private val handler = Handler(Looper.getMainLooper())
     private val updateSeekBarRunnable = object : Runnable {
@@ -63,6 +66,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         audioVisualizer = view.findViewById(R.id.audioVisualizer)
         elapsedTimeTextView = view.findViewById(R.id.elapsedTimeTextView)
         totalDurationTextView = view.findViewById(R.id.totalDurationTextView)
+        trackImageView = view.findViewById(R.id.trackImageView)
 
         buttonDown.setOnClickListener { collapseFragment() }
         prevButton.setOnClickListener {
@@ -204,6 +208,12 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     fun updateTrackInfo(track: Track) {
         titleTextView.text = track.title
         artistTextView.text = track.artist
+        track.albumArt?.let {
+            val bitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
+            trackImageView.setImageBitmap(bitmap)
+        } ?: run{
+            trackImageView.setImageResource(R.drawable.default_image)
+        }
     }
 
     fun updateSeekbar(position: Int, duration: Int) {

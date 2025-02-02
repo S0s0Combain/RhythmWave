@@ -24,6 +24,7 @@
             android:scaleType="fitCenter"
             android:src="@drawable/baseline_keyboard_arrow_down_24"
             app:tint="@color/light_gray" />
+
     </LinearLayout>
 
     <ImageView
