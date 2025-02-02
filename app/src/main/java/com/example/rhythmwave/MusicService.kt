@@ -55,6 +55,8 @@ class MusicService : Service() {
     private lateinit var mediaSessionCallback: MediaSessionCompat.Callback
     private lateinit var audioManager: AudioManager
     private var audioFocusRequest: AudioManager.OnAudioFocusChangeListener? = null
+    var isShuffleEnabled = false
+    var shuffledIndices: List<Int> = emptyList()
 
     private val binder = MusicServiceBinder()
 
@@ -265,21 +267,35 @@ class MusicService : Service() {
         }
     }
 
-    fun previousTrack() {
-        if (currentTrackIndex > 0) {
-            currentTrackIndex--
+    fun nextTrack() {
+        Log.d("MyLog", currentTrackIndex.toString())
+        if (isShuffleEnabled) {
+            Log.d("MyLog", "true")
+            currentTrackIndex = (currentTrackIndex + 1) % shuffledIndices.size
+            playTrack(trackList[shuffledIndices[currentTrackIndex]])
+        } else {
+            Log.d("MyLog", "false")
+            if (currentTrackIndex < trackList.size - 1) {
+                currentTrackIndex++
+            } else {
+                currentTrackIndex = 0
+            }
             playTrack(trackList[currentTrackIndex])
         }
     }
 
-    fun nextTrack() {
-        if (currentTrackIndex < trackList.size - 1) {
-            currentTrackIndex++
+    fun previousTrack() {
+        if (isShuffleEnabled) {
+            currentTrackIndex = (currentTrackIndex - 1 + shuffledIndices.size) % shuffledIndices.size
+            playTrack(trackList[shuffledIndices[currentTrackIndex]])
         } else {
-            currentTrackIndex = 0
+            if (currentTrackIndex > 0) {
+                currentTrackIndex--
+                playTrack(trackList[currentTrackIndex])
+            }
         }
-        playTrack(trackList[currentTrackIndex])
     }
+
 
     fun seekTo(position: Int) {
         exoPlayer.seekTo(position.toLong())
@@ -303,11 +319,9 @@ class MusicService : Service() {
     }
 
     fun shuffleTrackList() {
-        Log.d("MyLog", "Function vizvana")
         trackList = trackList.shuffled()
         currentTrackIndex = 0
         if (trackList.isNotEmpty()) {
-            Log.d("MyLog", "Ne empty")
             playTrack(trackList[currentTrackIndex])
         }
     }

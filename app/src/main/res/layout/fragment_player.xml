@@ -168,7 +168,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/light_gray" />
 
-
         <ImageButton
             android:id="@+id/favoriteButton"
             android:layout_width="30dp"

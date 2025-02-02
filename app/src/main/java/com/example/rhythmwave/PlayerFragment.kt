@@ -1,8 +1,10 @@
 package com.example.rhythmwave
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.media.Image
 import android.media.audiofx.Visualizer
 import android.opengl.GLSurfaceView
 import android.os.Bundle
@@ -44,6 +46,8 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     private lateinit var trackImageView: ImageView
     private lateinit var equalizerImageButton: ImageButton
     private lateinit var favoriteButton: ImageButton
+    private lateinit var shuffleButton: ImageButton
+    private var trackList: List<Track>? = null
     var musicService: MusicService? = null
     private val handler = Handler(Looper.getMainLooper())
     private val updateSeekBarRunnable = object : Runnable {
@@ -61,6 +65,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_player, container, false)
+        trackList = musicService?.getTrackList()
         (activity as MainActivity).trackControlLayout.visibility = View.GONE
         buttonDown = view.findViewById(R.id.buttonDown)
         titleTextView = view.findViewById(R.id.titleTextView)
@@ -76,6 +81,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         trackImageView = view.findViewById(R.id.trackImageView)
         equalizerImageButton = view.findViewById(R.id.equalizerImageButton)
         favoriteButton = view.findViewById(R.id.favoriteButton)
+        shuffleButton = view.findViewById(R.id.shuffleButton)
 
         buttonDown.setOnClickListener { collapseFragment() }
         prevButton.setOnClickListener {
@@ -143,6 +149,45 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
                     }
                 }
             }
+        }
+
+        shuffleButton.setOnClickListener {
+            musicService?.isShuffleEnabled = !musicService?.isShuffleEnabled!!
+            saveShuffleState(musicService?.isShuffleEnabled!!)
+            if (musicService?.isShuffleEnabled!!) {
+                shuffleButton.setColorFilter(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.accent_color_blue
+                    ), android.graphics.PorterDuff.Mode.SRC_IN
+                )
+                musicService?.shuffledIndices = trackList?.indices!!.shuffled()
+            } else {
+                shuffleButton.setColorFilter(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.light_gray
+                    ), android.graphics.PorterDuff.Mode.SRC_IN
+                )
+            }
+        }
+
+        musicService?.isShuffleEnabled = loadShuffleState()
+        if (musicService?.isShuffleEnabled!!) {
+            shuffleButton.setColorFilter(
+                ContextCompat.getColor(
+                    requireContext(),
+                    R.color.accent_color_blue
+                ), android.graphics.PorterDuff.Mode.SRC_IN
+            )
+            musicService?.shuffledIndices = trackList?.indices!!.shuffled()
+        } else {
+            shuffleButton.setColorFilter(
+                ContextCompat.getColor(
+                    requireContext(),
+                    R.color.light_gray
+                ), android.graphics.PorterDuff.Mode.SRC_IN
+            )
         }
 
         return view
@@ -312,5 +357,17 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
             val favoriteTrackDao = AppDatabase.getDatabase(requireContext()).favoriteTrackDao()
             favoriteTrackDao.removeTrackFromFavorites(trackId)
         }
+    }
+
+    private fun saveShuffleState(isEnabled: Boolean) {
+        val sharedPreferences = requireContext().getSharedPreferences("MusicServicePrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putBoolean("isShuffleEnabled", isEnabled)
+        editor.apply()
+    }
+
+    private fun loadShuffleState(): Boolean {
+        val sharedPreferences = requireContext().getSharedPreferences("MusicServicePrefs", Context.MODE_PRIVATE)
+        return sharedPreferences.getBoolean("isShuffleEnabled", false)
     }
 }
