@@ -33,9 +33,9 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_gravity="end"
+            android:layout_marginEnd="16dp"
             android:background="@null"
             android:scaleType="fitCenter"
-            android:layout_marginEnd="16dp"
             android:src="@drawable/baseline_equalizer_24"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -48,15 +48,15 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
+        android:background="@drawable/rounded_image_view"
+        android:clipToOutline="true"
         android:scaleType="centerCrop"
         android:src="@drawable/default_image"
-        android:layout_marginTop="8dp"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:background="@drawable/rounded_image_view"
-        android:clipToOutline="true"
         app:layout_constraintTop_toBottomOf="@id/topLinearLayout" />
 
     <com.example.rhythmwave.AudioVisualizer
@@ -73,10 +73,10 @@
         android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:textColor="@color/light_gray"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/trackImageView" />
@@ -101,56 +101,95 @@
         android:progressBackgroundTint="@color/light_gray2"
         android:progressTint="@color/accent_color_blue"
         android:thumbTint="@color/accent_color_blue"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout" />
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:padding="16dp"
         app:layout_constraintTop_toBottomOf="@+id/audioVisualizer">
 
         <ImageButton
             android:id="@+id/prevButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:background="@null"
             android:scaleType="fitCenter"
             android:src="@drawable/baseline_skip_previous_24"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/shuffleButton"
+            app:layout_constraintEnd_toStartOf="@id/pauseButton"
             app:tint="@color/light_gray" />
+
 
         <ImageButton
             android:id="@+id/pauseButton"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:layout_marginStart="50dp"
-            android:layout_marginEnd="50dp"
             android:background="@null"
             android:scaleType="fitCenter"
             android:src="@drawable/baseline_pause_circle_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/light_gray" />
 
         <ImageButton
             android:id="@+id/nextButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:background="@null"
             android:scaleType="fitCenter"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/pauseButton"
+            app:layout_constraintEnd_toStartOf="@id/favoriteButton"
             android:src="@drawable/baseline_skip_next_24"
             app:tint="@color/light_gray" />
-    </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/shuffleButton"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_shuffle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/light_gray" />
+
+
+        <ImageButton
+            android:id="@+id/favoriteButton"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_favorite_outline"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/light_gray"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <TextView
         android:id="@+id/elapsedTimeTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:textColor="@color/light_gray"
         android:textSize="14sp"
-        android:layout_marginStart="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/fragmentSeekBar" />
 
@@ -158,9 +197,10 @@
         android:id="@+id/totalDurationTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
         android:textColor="@color/light_gray"
         android:textSize="14sp"
-        android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/fragmentSeekBar" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

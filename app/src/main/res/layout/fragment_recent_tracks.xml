@@ -8,7 +8,7 @@
     android:background="@color/primary_background">
 
     <LinearLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
@@ -56,7 +56,7 @@
         app:icon="@drawable/ic_play"
         app:iconTint="@color/light_gray"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/linearLayout" />
+        app:layout_constraintTop_toBottomOf="@id/constraintLayout" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tracksRecyclerView"

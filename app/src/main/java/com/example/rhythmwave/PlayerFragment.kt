@@ -22,7 +22,11 @@ import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     private lateinit var buttonDown: ImageButton
@@ -39,6 +43,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     private lateinit var totalDurationTextView: TextView
     private lateinit var trackImageView: ImageView
     private lateinit var equalizerImageButton: ImageButton
+    private lateinit var favoriteButton: ImageButton
     var musicService: MusicService? = null
     private val handler = Handler(Looper.getMainLooper())
     private val updateSeekBarRunnable = object : Runnable {
@@ -70,6 +75,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         totalDurationTextView = view.findViewById(R.id.totalDurationTextView)
         trackImageView = view.findViewById(R.id.trackImageView)
         equalizerImageButton = view.findViewById(R.id.equalizerImageButton)
+        favoriteButton = view.findViewById(R.id.favoriteButton)
 
         buttonDown.setOnClickListener { collapseFragment() }
         prevButton.setOnClickListener {
@@ -114,6 +120,31 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         }
 
         equalizerImageButton.setOnClickListener { createEqualizerActivity() }
+        favoriteButton.setOnClickListener {
+            val currentTrack = musicService?.getCurrentTrack()
+            currentTrack?.let { track ->
+                isTrackFavorite(track.id) { isFavorite ->
+                    if (isFavorite) {
+                        removeTrackFromFavorites(track.id)
+                        favoriteButton.setColorFilter(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.light_gray
+                            ), android.graphics.PorterDuff.Mode.SRC_IN
+                        )
+                    } else {
+                        addTrackToFavorites(track)
+                        favoriteButton.setColorFilter(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.accent_color_blue
+                            ), android.graphics.PorterDuff.Mode.SRC_IN
+                        )
+                    }
+                }
+            }
+        }
+
         return view
     }
 
@@ -123,10 +154,23 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         if (currentTrack != null) {
             updateTrackInfo(currentTrack)
             updateSeekbar(musicService?.getCurrentPosition() ?: 0, currentTrack.duration)
-        }
-        if (currentTrack != null) {
-            updateTrackInfo(currentTrack)
-            updateSeekbar(musicService?.getCurrentPosition() ?: 0, currentTrack.duration)
+            isTrackFavorite(currentTrack.id) { isFavorite ->
+                if (isFavorite) {
+                    favoriteButton.setColorFilter(
+                        ContextCompat.getColor(
+                            requireContext(),
+                            R.color.accent_color_blue
+                        ), android.graphics.PorterDuff.Mode.SRC_IN
+                    )
+                } else {
+                    favoriteButton.setColorFilter(
+                        ContextCompat.getColor(
+                            requireContext(),
+                            R.color.light_gray
+                        ), android.graphics.PorterDuff.Mode.SRC_IN
+                    )
+                }
+            }
         }
         musicService?.let { service ->
             audioVisualizer.getPathMedia(service.getExoPlayer())
@@ -216,7 +260,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         track.albumArt?.let {
             val bitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
             trackImageView.setImageBitmap(bitmap)
-        } ?: run{
+        } ?: run {
             trackImageView.setImageResource(R.drawable.default_image)
         }
     }
@@ -238,5 +282,35 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     private fun createEqualizerActivity() {
         val intent = Intent(requireContext(), EqualizerActivity::class.java)
         startActivity(intent)
+    }
+
+    private fun isTrackFavorite(trackId: Long, callback: (Boolean) -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
+            val favoriteTrackDao = AppDatabase.getDatabase(requireContext()).favoriteTrackDao()
+            val count = favoriteTrackDao.isTrackFavorite(trackId)
+            callback(count > 0)
+        }
+    }
+
+    private fun addTrackToFavorites(track: Track) {
+        CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
+            val favoriteTrackDao = AppDatabase.getDatabase(requireContext()).favoriteTrackDao()
+            favoriteTrackDao.insert(
+                FavoriteTrack(
+                    track.id,
+                    track.title,
+                    track.artist,
+                    track.duration,
+                    track.albumArt
+                )
+            )
+        }
+    }
+
+    private fun removeTrackFromFavorites(trackId: Long) {
+        CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
+            val favoriteTrackDao = AppDatabase.getDatabase(requireContext()).favoriteTrackDao()
+            favoriteTrackDao.removeTrackFromFavorites(trackId)
+        }
     }
 }
