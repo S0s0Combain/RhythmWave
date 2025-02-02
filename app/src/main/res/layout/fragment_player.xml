@@ -7,7 +7,7 @@
     android:background="@color/primary_background"
     tools:context=".PlayerFragment">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -23,9 +23,25 @@
             android:background="@null"
             android:scaleType="fitCenter"
             android:src="@drawable/baseline_keyboard_arrow_down_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/light_gray" />
 
-    </LinearLayout>
+        <ImageButton
+            android:id="@+id/equalizerImageButton"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="end"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/baseline_equalizer_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/light_gray" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ImageView
         android:id="@+id/trackImageView"

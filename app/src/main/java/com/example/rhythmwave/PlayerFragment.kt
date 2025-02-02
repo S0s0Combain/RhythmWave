@@ -1,6 +1,7 @@
 package com.example.rhythmwave
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.media.audiofx.Visualizer
 import android.opengl.GLSurfaceView
@@ -37,6 +38,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     private lateinit var elapsedTimeTextView: TextView
     private lateinit var totalDurationTextView: TextView
     private lateinit var trackImageView: ImageView
+    private lateinit var equalizerImageButton: ImageButton
     var musicService: MusicService? = null
     private val handler = Handler(Looper.getMainLooper())
     private val updateSeekBarRunnable = object : Runnable {
@@ -67,6 +69,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         elapsedTimeTextView = view.findViewById(R.id.elapsedTimeTextView)
         totalDurationTextView = view.findViewById(R.id.totalDurationTextView)
         trackImageView = view.findViewById(R.id.trackImageView)
+        equalizerImageButton = view.findViewById(R.id.equalizerImageButton)
 
         buttonDown.setOnClickListener { collapseFragment() }
         prevButton.setOnClickListener {
@@ -109,6 +112,8 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         } else {
             pauseButton.setImageResource(R.drawable.ic_play)
         }
+
+        equalizerImageButton.setOnClickListener { createEqualizerActivity() }
         return view
     }
 
@@ -228,5 +233,10 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         val minutes = (milliseconds / 1000) / 60
         val seconds = (milliseconds / 1000) % 60
         return String.format("%02d:%02d", minutes, seconds)
+    }
+
+    private fun createEqualizerActivity() {
+        val intent = Intent(requireContext(), EqualizerActivity::class.java)
+        startActivity(intent)
     }
 }
