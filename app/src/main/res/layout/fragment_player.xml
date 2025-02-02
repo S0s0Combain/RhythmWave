@@ -5,10 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary_background"
-    android:padding="16dp"
     tools:context=".PlayerFragment">
 
     <LinearLayout
+        android:id="@+id/topLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -26,36 +26,55 @@
             app:tint="@color/light_gray" />
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/trackImageView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/default_image"
+        android:layout_marginTop="8dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:background="@drawable/rounded_image_view"
+        android:clipToOutline="true"
+        app:layout_constraintTop_toBottomOf="@id/topLinearLayout" />
+
     <com.example.rhythmwave.AudioVisualizer
         android:id="@+id/audioVisualizer"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        app:layout_constraintBottom_toTopOf="@id/titleTextView"
+        android:layout_height="250dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/artistTextView" />
 
     <TextView
         android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/light_gray"
-        android:textSize="24sp"
+        android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/artistTextView"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/trackImageView" />
 
     <TextView
         android:id="@+id/artistTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/titleTextView"
-        android:layout_marginBottom="16dp"
-        android:textColor="@color/light_gray"
-        android:textSize="18sp"
+        android:textColor="@color/light_gray2"
+        android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/fragmentSeekBar"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/titleTextView" />
 
     <SeekBar
         android:id="@+id/fragmentSeekBar"
@@ -65,20 +84,19 @@
         android:progressBackgroundTint="@color/light_gray2"
         android:progressTint="@color/accent_color_blue"
         android:thumbTint="@color/accent_color_blue"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/visualizationView">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/audioVisualizer">
 
         <ImageButton
             android:id="@+id/prevButton"
@@ -109,4 +127,23 @@
             android:src="@drawable/baseline_skip_next_24"
             app:tint="@color/light_gray" />
     </LinearLayout>
+    <TextView
+        android:id="@+id/elapsedTimeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/light_gray"
+        android:textSize="14sp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fragmentSeekBar" />
+
+    <TextView
+        android:id="@+id/totalDurationTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/light_gray"
+        android:textSize="14sp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fragmentSeekBar" />
 </androidx.constraintlayout.widget.ConstraintLayout>

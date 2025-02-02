@@ -32,12 +32,15 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     private lateinit var gestureDetector: GestureDetector
     private lateinit var trackControlLayout: ConstraintLayout
     private lateinit var audioVisualizer: AudioVisualizer
+    private lateinit var elapsedTimeTextView: TextView
+    private lateinit var totalDurationTextView: TextView
     var musicService: MusicService? = null
     private val handler = Handler(Looper.getMainLooper())
     private val updateSeekBarRunnable = object : Runnable {
         override fun run() {
             val currentPosition = musicService?.getCurrentPosition() ?: 0
             fragmentSeekBar.progress = currentPosition
+            elapsedTimeTextView.text = formatTime(currentPosition)
             handler.postDelayed(this, 1000)
         }
     }
@@ -58,6 +61,8 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         fragmentSeekBar = view.findViewById(R.id.fragmentSeekBar)
         trackControlLayout = (activity as MainActivity).findViewById(R.id.trackControlLayout)
         audioVisualizer = view.findViewById(R.id.audioVisualizer)
+        elapsedTimeTextView = view.findViewById(R.id.elapsedTimeTextView)
+        totalDurationTextView = view.findViewById(R.id.totalDurationTextView)
 
         buttonDown.setOnClickListener { collapseFragment() }
         prevButton.setOnClickListener {
@@ -204,5 +209,14 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
     fun updateSeekbar(position: Int, duration: Int) {
         fragmentSeekBar.max = duration
         fragmentSeekBar.progress = position
+        elapsedTimeTextView.text = formatTime(position)
+        totalDurationTextView.text = formatTime(duration)
+    }
+
+    @SuppressLint("DefaultLocale")
+    private fun formatTime(milliseconds: Int): String {
+        val minutes = (milliseconds / 1000) / 60
+        val seconds = (milliseconds / 1000) % 60
+        return String.format("%02d:%02d", minutes, seconds)
     }
 }
