@@ -1,6 +1,5 @@
 package com.example.rhythmwave
 
-import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
@@ -12,7 +11,6 @@ import android.graphics.Shader
 import android.media.audiofx.Visualizer
 import android.util.AttributeSet
 import android.view.View
-import androidx.core.content.ContextCompat
 import com.google.android.exoplayer2.ExoPlayer
 import kotlin.math.log10
 import kotlin.math.max
@@ -64,7 +62,7 @@ class AudioVisualizer(context: Context, attrs: AttributeSet) : View(context, att
                 val fraction = animator.animatedFraction
                 val colorIndex = (fraction * (colors.size - 1)).toInt()
                 piePaint.shader = LinearGradient(
-                    0f, 0f, barWidth * barsCount, height.toFloat(),
+                    0f, 0f, width.toFloat(), height.toFloat(),
                     colors[colorIndex], colors[(colorIndex + 1) % colors.size],
                     Shader.TileMode.REPEAT
                 )
