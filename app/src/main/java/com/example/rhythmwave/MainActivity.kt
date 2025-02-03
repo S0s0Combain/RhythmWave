@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.IBinder
@@ -14,10 +15,12 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -25,6 +28,7 @@ import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
@@ -47,6 +51,12 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
     private var isBound = false
     private lateinit var viewPager: ViewPager2
     private var isTrackControlVisible = true
+    private val REQUEST_CODE_PERMISSIONS = 1001
+    private val REQUIRED_PERMISSIONS = arrayOf(
+        android.Manifest.permission.READ_EXTERNAL_STORAGE,
+        android.Manifest.permission.RECORD_AUDIO,
+        android.Manifest.permission.READ_MEDIA_AUDIO
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +68,16 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
             insets
         }
         window.navigationBarColor = ContextCompat.getColor(this, R.color.primary_background)
+
+        if (!allPermissionsGranted()) {
+            ActivityCompat.requestPermissions(
+                this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
+            )
+        }
+        initializeUI()
+    }
+
+    private fun initializeUI() {
         val tabLayout: TabLayout = findViewById(R.id.tabLayout)
         viewPager = findViewById(R.id.viewPager)
         searchEditText = findViewById(R.id.searchEditText)
@@ -136,10 +156,40 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
         }
     }
 
+    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_DENIED &&
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED &&
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_DENIED) {
+                MaterialAlertDialogBuilder(this)
+                    .setTitle("Необходимы разрешения")
+                    .setMessage("Для работы приложения требуется доступ к хранилищу и микрофону. Пожалуйста, предоставьте необходимые разрешения.")
+                    .setPositiveButton("Предоставить") { _, _ ->
+                        ActivityCompat.requestPermissions(
+                            this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
+                        )
+                    }
+                    .setNegativeButton("Отмена") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .setCancelable(false)
+                    .show()
+            }
+            initializeUI()
+        }
+    }
+
     override fun onStart() {
         super.onStart()
         Intent(this, MusicService::class.java).also { intent ->
-            bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+            bindService(intent, serviceConnection, BIND_AUTO_CREATE)
         }
     }
 

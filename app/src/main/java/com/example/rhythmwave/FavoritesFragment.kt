@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
 import androidx.fragment.app.Fragment
@@ -11,7 +12,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -73,7 +76,19 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
         pauseButton = (activity as MainActivity).findViewById(R.id.pauseButton)
         randomButton = view.findViewById(R.id.randomButton)
         randomButton.setOnClickListener {
-            shuffleTracks()
+            if (ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    android.Manifest.permission.RECORD_AUDIO
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                shuffleTracks()
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    "Отсутствует разрешение на доступ к микрофону",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
         backButton = view.findViewById(R.id.backButton)
         backButton.setOnClickListener {
@@ -121,38 +136,50 @@ class FavoritesFragment : Fragment(), TrackControlCallback {
     }
 
     private fun onTrackClick(track: FavoriteTrack) {
-        val trackToPlay = Track(
-            track.title,
-            track.artist,
-            track.duration,
-            track.id,
-            track.albumArt
-        )
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                android.Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val trackToPlay = Track(
+                track.title,
+                track.artist,
+                track.duration,
+                track.id,
+                track.albumArt
+            )
 
-        val currentTrackList = musicService?.getTrackList() ?: return
+            val currentTrackList = musicService?.getTrackList() ?: return
 
-        if (currentTrackList != favoriteTracks) {
-            musicService?.setTrackList(favoriteTracks.map {
-                Track(
-                    it.title,
-                    it.artist,
-                    it.duration,
-                    it.id,
-                    it.albumArt
-                )
-            })
-        }
+            if (currentTrackList != favoriteTracks) {
+                musicService?.setTrackList(favoriteTracks.map {
+                    Track(
+                        it.title,
+                        it.artist,
+                        it.duration,
+                        it.id,
+                        it.albumArt
+                    )
+                })
+            }
 
-        if (musicService?.getCurrentTrack() == trackToPlay) {
-            if (musicService?.isPlaying() == true) {
-                musicService?.pauseTrack()
+            if (musicService?.getCurrentTrack() == trackToPlay) {
+                if (musicService?.isPlaying() == true) {
+                    musicService?.pauseTrack()
+                } else {
+                    musicService?.resumeTrack()
+                    openPlayerFragment(musicService!!)
+                }
             } else {
-                musicService?.resumeTrack()
+                musicService?.playTrack(trackToPlay)
                 openPlayerFragment(musicService!!)
             }
         } else {
-            musicService?.playTrack(trackToPlay)
-            openPlayerFragment(musicService!!)
+            Toast.makeText(
+                requireContext(),
+                "Отсутствует разрешение на доступ к микрофону",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 

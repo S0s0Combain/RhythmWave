@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.media.Image
 import android.net.Uri
@@ -20,6 +21,7 @@ import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -122,20 +124,32 @@ class PlaylistTracksFragment : Fragment(), TrackControlCallback {
     }
 
     private fun onTrackClick(track: Track) {
-        val currentTrackList = musicService?.getTrackList() ?: return
-        if (currentTrackList != tracks) {
-            musicService?.setTrackList(tracks)
-        }
-        if (musicService?.getCurrentTrack() == track) {
-            if (musicService?.isPlaying() == true) {
-                musicService?.pauseTrack()
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                android.Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val currentTrackList = musicService?.getTrackList() ?: return
+            if (currentTrackList != tracks) {
+                musicService?.setTrackList(tracks)
+            }
+            if (musicService?.getCurrentTrack() == track) {
+                if (musicService?.isPlaying() == true) {
+                    musicService?.pauseTrack()
+                } else {
+                    musicService?.resumeTrack()
+                    openPlayerFragment(musicService)
+                }
             } else {
-                musicService?.resumeTrack()
+                musicService?.playTrack(track)
                 openPlayerFragment(musicService)
             }
         } else {
-            musicService?.playTrack(track)
-            openPlayerFragment(musicService)
+            Toast.makeText(
+                requireContext(),
+                "Отсутствует разрешение на доступ к микрофону",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 

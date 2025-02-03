@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
@@ -16,10 +17,14 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.ByteArrayOutputStream
 
 class TrackListFragment : Fragment(), TrackControlCallback {
@@ -32,6 +37,11 @@ class TrackListFragment : Fragment(), TrackControlCallback {
     private lateinit var pauseButton: ImageButton
     private lateinit var fragmentContainer: FrameLayout
     private lateinit var tracks: MutableList<Track>
+
+    private val REQUEST_CODE_PERMISSIONS = 1001
+    private val REQUIRED_PERMISSIONS = arrayOf(
+        android.Manifest.permission.RECORD_AUDIO
+    )
 
     var musicService: MusicService? = null
     private var isBound = false
@@ -183,20 +193,41 @@ class TrackListFragment : Fragment(), TrackControlCallback {
     }
 
     private fun onTrackClick(track: Track) {
-        val currentTrackList = musicService?.getTrackList() ?: return
-        if (currentTrackList != tracks) {
-            musicService?.setTrackList(tracks)
-        }
-        if (musicService?.getCurrentTrack() == track) {
-            if (musicService?.isPlaying() == true) {
-                musicService?.pauseTrack()
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                android.Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val currentTrackList = musicService?.getTrackList() ?: return
+            if (currentTrackList != tracks) {
+                musicService?.setTrackList(tracks)
+            }
+            if (musicService?.getCurrentTrack() == track) {
+                if (musicService?.isPlaying() == true) {
+                    musicService?.pauseTrack()
+                } else {
+                    musicService?.resumeTrack()
+                    openPlayerFragment(musicService)
+                }
             } else {
-                musicService?.resumeTrack()
+                musicService?.playTrack(track)
                 openPlayerFragment(musicService)
             }
-        } else {
-            musicService?.playTrack(track)
-            openPlayerFragment(musicService)
+        } else{
+//            Toast.makeText(requireContext(), "Отсутствует разрешение на доступ к микрофону", Toast.LENGTH_SHORT).show()
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Необходимы разрешения")
+                .setMessage("Для работы приложения требуется доступ к хранилищу и микрофону. Пожалуйста, предоставьте необходимые разрешения.")
+                .setPositiveButton("Предоставить") { _, _ ->
+                    ActivityCompat.requestPermissions(
+                        requireActivity(), REQUIRED_PERMISSIONS, 1001
+                    )
+                }
+                .setNegativeButton("Отмена") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .setCancelable(false)
+                .show()
         }
     }
 

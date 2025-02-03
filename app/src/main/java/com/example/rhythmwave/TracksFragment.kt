@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
@@ -15,7 +16,9 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -91,7 +94,21 @@ class TracksFragment : Fragment(), TrackControlCallback {
             serviceConnection,
             Context.BIND_AUTO_CREATE
         )
-        randomButton.setOnClickListener { shuffleTracks() }
+        randomButton.setOnClickListener {
+            if (ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    android.Manifest.permission.RECORD_AUDIO
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                shuffleTracks()
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    "Отсутствует разрешение на доступ к микрофону",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
         view.setOnClickListener { }
         return view
     }
@@ -114,20 +131,32 @@ class TracksFragment : Fragment(), TrackControlCallback {
     }
 
     private fun onTrackClick(track: Track) {
-        val currentTrackList = musicService?.getTrackList() ?: return
-        if (currentTrackList != tracks) {
-            musicService?.setTrackList(tracks)
-        }
-        if (musicService?.getCurrentTrack() == track) {
-            if (musicService?.isPlaying() == true) {
-                musicService?.pauseTrack()
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                android.Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val currentTrackList = musicService?.getTrackList() ?: return
+            if (currentTrackList != tracks) {
+                musicService?.setTrackList(tracks)
+            }
+            if (musicService?.getCurrentTrack() == track) {
+                if (musicService?.isPlaying() == true) {
+                    musicService?.pauseTrack()
+                } else {
+                    musicService?.resumeTrack()
+                    openPlayerFragment(musicService)
+                }
             } else {
-                musicService?.resumeTrack()
+                musicService?.playTrack(track)
                 openPlayerFragment(musicService)
             }
         } else {
-            musicService?.playTrack(track)
-            openPlayerFragment(musicService)
+            Toast.makeText(
+                requireContext(),
+                "Отсутствует разрешение на доступ к микрофону",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -160,7 +189,8 @@ class TracksFragment : Fragment(), TrackControlCallback {
         cursor?.use {
             if (it.moveToFirst()) {
                 do {
-                    val title = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE))
+                    val title =
+                        it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE))
                     val artist =
                         it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST))
                     val duration =
@@ -237,7 +267,7 @@ class TracksFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onTrackChanged(track: Track) {
-        if(isAdded) {
+        if (isAdded) {
             val fragmentManager = parentFragmentManager
             val currentFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
             if (currentFragment !is PlayerFragment) {
