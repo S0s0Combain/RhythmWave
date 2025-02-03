@@ -199,23 +199,7 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         if (currentTrack != null) {
             updateTrackInfo(currentTrack)
             updateSeekbar(musicService?.getCurrentPosition() ?: 0, currentTrack.duration)
-            isTrackFavorite(currentTrack.id) { isFavorite ->
-                if (isFavorite) {
-                    favoriteButton.setColorFilter(
-                        ContextCompat.getColor(
-                            requireContext(),
-                            R.color.accent_color_blue
-                        ), android.graphics.PorterDuff.Mode.SRC_IN
-                    )
-                } else {
-                    favoriteButton.setColorFilter(
-                        ContextCompat.getColor(
-                            requireContext(),
-                            R.color.light_gray
-                        ), android.graphics.PorterDuff.Mode.SRC_IN
-                    )
-                }
-            }
+            updateFavorite(currentTrack)
         }
         musicService?.let { service ->
             audioVisualizer.getPathMedia(service.getExoPlayer())
@@ -315,6 +299,26 @@ class PlayerFragment : Fragment(), GestureDetector.OnGestureListener {
         fragmentSeekBar.progress = position
         elapsedTimeTextView.text = formatTime(position)
         totalDurationTextView.text = formatTime(duration)
+    }
+
+    fun updateFavorite(currentTrack: Track?){
+        isTrackFavorite(currentTrack!!.id) { isFavorite ->
+            if (isFavorite) {
+                favoriteButton.setColorFilter(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.accent_color_blue
+                    ), android.graphics.PorterDuff.Mode.SRC_IN
+                )
+            } else {
+                favoriteButton.setColorFilter(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.light_gray
+                    ), android.graphics.PorterDuff.Mode.SRC_IN
+                )
+            }
+        }
     }
 
     @SuppressLint("DefaultLocale")

@@ -183,6 +183,7 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
     }
 
     override fun onPlaybackStateChanged(isPlaying: Boolean) {
+        val currentTrack = musicService?.getCurrentTrack()
         if (isPlaying) {
             pauseButton.setImageResource(R.drawable.baseline_pause_24)
         } else {
@@ -193,9 +194,10 @@ class MainActivity : AppCompatActivity(), TrackControlCallback {
             supportFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
         playerFragment?.updateSeekbar(
             MusicService.getInstance()?.getCurrentPosition() ?: 0,
-            MusicService.getInstance()?.getCurrentTrack()?.duration ?: 0
+            currentTrack?.duration ?: 0
         )
         playerFragment?.updatePlayPauseButton(isPlaying)
+        playerFragment?.updateFavorite(currentTrack)
     }
 
     fun showTrackControl(track: Track) {

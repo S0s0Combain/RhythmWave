@@ -214,7 +214,8 @@ class TrackListFragment : Fragment(), TrackControlCallback {
     }
 
     override fun onPlaybackStateChanged(isPlaying: Boolean) {
-        trackAdapter.updateCurrentTrack(musicService?.getCurrentTrack())
+        val currentTrack = musicService?.getCurrentTrack()
+        trackAdapter.updateCurrentTrack(currentTrack)
         if (isPlaying) {
             pauseButton.setImageResource(R.drawable.baseline_pause_24)
         } else {
@@ -224,9 +225,10 @@ class TrackListFragment : Fragment(), TrackControlCallback {
             parentFragmentManager.findFragmentById(R.id.fragmentContainer) as? PlayerFragment
         playerFragment?.updateSeekbar(
             musicService?.getCurrentPosition() ?: 0,
-            musicService?.getCurrentTrack()?.duration ?: 0
+            currentTrack?.duration ?: 0
         )
         playerFragment?.updatePlayPauseButton(isPlaying)
+        playerFragment?.updateFavorite(currentTrack)
     }
 
     private fun deleteTrack(track: Track) {
